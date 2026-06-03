@@ -1,0 +1,29 @@
+name: wallhaven_explorer_flutter
+description: A premium Wallhaven wallpaper explorer in Flutter and Dart.
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_riverpod: ^2.4.9
+  dio: ^5.4.0
+  sqlite3: ^2.4.0
+  sqlite3_flutter_libs: ^0.5.18
+  image: ^4.1.3
+  path_provider: ^2.1.1
+  url_launcher: ^6.2.2
+  window_manager: ^0.3.7
+  path: ^1.8.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true

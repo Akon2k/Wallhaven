@@ -32,3 +32,8 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
   - Diseño: Eliminación del TabControl por defecto. Barra lateral de iconos de navegación, grilla de resultados con WrapPanel en tarjetas y visor interactivo de pantalla dividida.
   - UI: Estilos de tarjetas con zoom, gradientes oscuros en XAML, scrollbars y botones customizados y panel de detalles colapsable.
   - Testing: Cobertura de tests para el control de visibilidad de paneles y grillas en ExtraFeaturesTests.cs.
+- [x] **Punto 9: Migración de Arquitectura Completa a Flutter & Dart** | *AkonDeV 03/06/2026*
+  - Diseño: Reemplazo de WPF C# .NET 8 por Flutter y Dart 3.x. Clean Architecture con Riverpod como gestor de estado e inyección de dependencias.
+  - Datos y Servicios: Migración de SQLite (.NET) a base de datos local `sqlite3` en memoria/disco en Dart. Adaptación del reescalado de imágenes de ImageSharp a la librería Dart `image`. Consumo de API con `dio`.
+  - UI/UX Premium: Diseño de barra de navegación izquierda, WrapPanel adaptativo de miniaturas, visor interactivo con zoom/paneo nativo y detalles colapsables.
+  - Testing: Implementación de la suite de pruebas equivalentes en `test/wallhaven_explorer_tests.dart` usando base de datos en memoria para aislamiento.
