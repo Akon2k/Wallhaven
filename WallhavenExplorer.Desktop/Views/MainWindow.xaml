@@ -102,38 +102,127 @@
                 </Border>
             </Grid>
 
-            <StackPanel Grid.Column="1" Margin="15,0,0,0">
-                <TextBlock Text="INFORMACIÓN" FontSize="16" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,10"/>
-                <TextBlock Text="{Binding SelectedWallpaper.Id, StringFormat='ID: {0}'}" Margin="0,4"/>
-                <TextBlock Text="{Binding SelectedWallpaper.Resolution, StringFormat='Resolución: {0}'}" Margin="0,4"/>
-                <TextBlock Text="{Binding SelectedWallpaper.Category, StringFormat='Categoría: {0}'}" Margin="0,4"/>
-                <TextBlock Text="{Binding SelectedWallpaper.Uploader, StringFormat='Autor: {0}'}" Margin="0,4"/>
-
-                <Button Command="{Binding DownloadOriginalCommand}" Content="Descargar Original" Margin="0,20,0,0" Height="35" Background="#28A745" Foreground="White" BorderThickness="0"/>
+            <TabControl Grid.Column="1" Margin="15,0,0,0" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="HeaderTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <ContentPresenter Content="{TemplateBinding Content}" Margin="10,6" RecognizesAccessKey="True"/>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Background" Value="#2D2D2D"/>
+                        <Setter Property="Foreground" Value="#CCCCCC"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </TabControl.Resources>
                 
-                <!-- Redimensionador Móvil -->
-                <Border BorderBrush="#333333" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,15,0,0" Background="#1A1A1A">
-                    <StackPanel>
-                        <TextBlock Text="REDIMENSIONAR MÓVIL" FontSize="14" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,10"/>
-                        
-                        <TextBlock Text="Resolución:" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,3"/>
-                        <ComboBox SelectedValue="{Binding SelectedResizeResolution}" SelectedValuePath="Content" Height="25" Margin="0,0,0,10">
-                            <ComboBoxItem Content="1080x1920" IsSelected="True"/>
-                            <ComboBoxItem Content="1440x2560"/>
-                            <ComboBoxItem Content="720x1280"/>
-                        </ComboBox>
+                <!-- Tab 1: Detalle -->
+                <TabItem Header="Detalles">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="12">
+                            <TextBlock Text="INFORMACIÓN" FontSize="14" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding SelectedWallpaper.Id, StringFormat='ID: {0}'}" Margin="0,4" Foreground="White"/>
+                            <TextBlock Text="{Binding SelectedWallpaper.Resolution, StringFormat='Resolución: {0}'}" Margin="0,4" Foreground="White"/>
+                            <TextBlock Text="{Binding SelectedWallpaper.Category, StringFormat='Categoría: {0}'}" Margin="0,4" Foreground="White"/>
+                            <TextBlock Text="{Binding SelectedWallpaper.Uploader, StringFormat='Autor: {0}'}" Margin="0,4" Foreground="White"/>
 
-                        <TextBlock Text="Modo:" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,3"/>
-                        <ComboBox SelectedValue="{Binding SelectedResizeMode}" SelectedValuePath="Content" Height="25" Margin="0,0,0,15">
-                            <ComboBoxItem Content="SmartCropCentred" IsSelected="True"/>
-                            <ComboBoxItem Content="LetterboxBlack"/>
-                            <ComboBoxItem Content="ScaleMaintainAspect"/>
-                        </ComboBox>
+                            <!-- Botón Favorito -->
+                            <Button Command="{Binding ToggleFavoriteCommand}" Margin="0,15,0,0" Height="35" Foreground="White" BorderThickness="0" FontWeight="Bold">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#D39E00"/>
+                                        <Setter Property="Content" Value="★ Añadir a Favoritos"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                <Setter Property="Background" Value="#C82333"/>
+                                                <Setter Property="Content" Value="★ Quitar de Favoritos"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
 
-                        <Button Command="{Binding CreateMobileVersionCommand}" Content="Crear Versión Móvil" Height="30" Background="#17A2B8" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+                            <Button Command="{Binding DownloadOriginalCommand}" Content="Descargar Original" Margin="0,10,0,0" Height="35" Background="#28A745" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+
+                            <!-- Redimensionador Móvil -->
+                            <Border BorderBrush="#333333" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,20,0,0" Background="#121212">
+                                <StackPanel>
+                                    <TextBlock Text="REDIMENSIONAR MÓVIL" FontSize="12" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,10"/>
+
+                                    <TextBlock Text="Resolución:" FontSize="11" Foreground="#AAAAAA" Margin="0,0,0,3"/>
+                                    <ComboBox SelectedValue="{Binding SelectedResizeResolution}" SelectedValuePath="Content" Height="25" Margin="0,0,0,10" Background="#2A2A2A" Foreground="White" BorderBrush="#333333">
+                                        <ComboBoxItem Content="1080x1920" IsSelected="True"/>
+                                        <ComboBoxItem Content="1440x2560"/>
+                                        <ComboBoxItem Content="720x1280"/>
+                                    </ComboBox>
+
+                                    <TextBlock Text="Modo:" FontSize="11" Foreground="#AAAAAA" Margin="0,0,0,3"/>
+                                    <ComboBox SelectedValue="{Binding SelectedResizeMode}" SelectedValuePath="Content" Height="25" Margin="0,0,0,15" Background="#2A2A2A" Foreground="White" BorderBrush="#333333">
+                                        <ComboBoxItem Content="SmartCropCentred" IsSelected="True"/>
+                                        <ComboBoxItem Content="LetterboxBlack"/>
+                                        <ComboBoxItem Content="ScaleMaintainAspect"/>
+                                    </ComboBox>
+
+                                    <Button Command="{Binding CreateMobileVersionCommand}" Content="Crear Versión Móvil" Height="30" Background="#17A2B8" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                
+                <!-- Tab 2: Favoritos -->
+                <TabItem Header="Favoritos">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="MIS FAVORITOS" FontSize="14" FontWeight="Bold" Foreground="#007ACC" Margin="12,12,12,6"/>
+                        <ListBox Grid.Row="1" ItemsSource="{Binding FavoriteWallpapers}" SelectedItem="{Binding SelectedWallpaper, Mode=TwoWay}" Background="#121212" Foreground="White" BorderThickness="0" Margin="10,0,10,10">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#333333" BorderThickness="0,0,0,1" Padding="8" CornerRadius="2" Margin="0,2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Id, StringFormat='ID: {0}'}" FontWeight="Bold" Foreground="#007ACC" FontSize="12"/>
+                                                <TextBlock Text="{Binding Resolution}" FontSize="11" Foreground="#AAAAAA" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding Category}" FontSize="11" Foreground="#AAAAAA" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </TabItem>
+                
+                <!-- Tab 3: Historial -->
+                <TabItem Header="Historial">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="BÚSQUEDAS RECIENTES" FontSize="14" FontWeight="Bold" Foreground="#007ACC" Margin="12,12,12,6"/>
+                        <ListBox Grid.Row="1" x:Name="HistoryListBox" ItemsSource="{Binding SearchHistory}" MouseDoubleClick="HistoryListBox_MouseDoubleClick" Background="#121212" Foreground="White" BorderThickness="0" Margin="10,0,10,10">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#333333" BorderThickness="0,0,0,1" Padding="8" CornerRadius="2" Margin="0,2">
+                                        <TextBlock Text="{Binding}" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
         </Grid>
 
         <!-- Paginación -->

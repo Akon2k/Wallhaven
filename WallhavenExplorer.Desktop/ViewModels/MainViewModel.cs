@@ -29,6 +29,9 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private ObservableCollection<Wallpaper> _wallpapers = new();
         [ObservableProperty] private Wallpaper? _selectedWallpaper;
         [ObservableProperty] private string _displayedImagePath = string.Empty;
+        [ObservableProperty] private ObservableCollection<Wallpaper> _favoriteWallpapers = new();
+        [ObservableProperty] private ObservableCollection<string> _searchHistory = new();
+        [ObservableProperty] private bool _isFavorite;
         
         // Paginación
         [ObservableProperty] private int _currentPage = 1;
@@ -70,6 +73,8 @@ namespace WallhavenExplorer.Desktop.ViewModels
             
             // Búsqueda automática inicial al cargar la aplicación
             _ = ExecuteSearchAsync();
+            _ = LoadFavoritesAsync();
+            _ = LoadHistoryAsync();
         }
 
         partial void OnSelectedWallpaperChanged(Wallpaper? value)
@@ -84,6 +89,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
             if (wp == null)
             {
                 DisplayedImagePath = string.Empty;
+                IsFavorite = false;
                 return;
             }
 
@@ -93,12 +99,14 @@ namespace WallhavenExplorer.Desktop.ViewModels
             {
                 string localPath = await _imageCacheService.GetCachedImagePathAsync(wp.Id, wp.Path);
                 DisplayedImagePath = localPath;
+                IsFavorite = await _databaseService.IsFavoriteAsync(wp.Id);
                 StatusMessage = $"Mostrando wallpaper ID: {wp.Id}";
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error al cargar el wallpaper a la vista.");
                 DisplayedImagePath = wp.Path; // Fallback a URL original
+                IsFavorite = await _databaseService.IsFavoriteAsync(wp.Id);
                 StatusMessage = "Error al cachear; mostrando imagen de forma remota.";
             }
             finally
@@ -163,6 +171,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
                 }
 
                 await _databaseService.SaveSearchHistoryAsync(SearchQuery, "{}");
+                await LoadHistoryAsync();
             }
             catch (OperationCanceledException)
             {
@@ -333,6 +342,87 @@ namespace WallhavenExplorer.Desktop.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        public async Task ToggleFavoriteAsync()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return;
+
+            try
+            {
+                if (IsFavorite)
+                {
+                    await _databaseService.RemoveFavoriteAsync(SelectedWallpaper.Id);
+                    IsFavorite = false;
+                    StatusMessage = "Eliminado de favoritos.";
+                }
+                else
+                {
+                    await _databaseService.SaveFavoriteAsync(SelectedWallpaper);
+                    IsFavorite = true;
+                    StatusMessage = "Añadido a favoritos.";
+                }
+                await LoadFavoritesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al alternar favorito para {Id}", SelectedWallpaper.Id);
+                StatusMessage = "Error al actualizar favoritos.";
+            }
+        }
+
+        [RelayCommand]
+        public async Task LoadFavoritesAsync()
+        {
+            // // AkonDeV 06/2026
+            try
+            {
+                var favorites = await _databaseService.GetFavoritesAsync();
+                FavoriteWallpapers.Clear();
+                foreach (var fav in favorites)
+                {
+                    FavoriteWallpapers.Add(fav);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al cargar favoritos.");
+            }
+        }
+
+        [RelayCommand]
+        public async Task LoadHistoryAsync()
+        {
+            // // AkonDeV 06/2026
+            try
+            {
+                var history = await _databaseService.GetSearchHistoryAsync(20);
+                SearchHistory.Clear();
+                var added = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in history)
+                {
+                    if (!string.IsNullOrWhiteSpace(item.Item1) && added.Add(item.Item1))
+                    {
+                        SearchHistory.Add(item.Item1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al cargar historial.");
+            }
+        }
+
+        [RelayCommand]
+        public async Task SearchQueryFromHistoryAsync(string query)
+        {
+            // // AkonDeV 06/2026
+            if (string.IsNullOrWhiteSpace(query)) return;
+            SearchQuery = query;
+            CurrentPage = 1;
+            await ExecuteSearchAsync();
         }
 
         [RelayCommand]

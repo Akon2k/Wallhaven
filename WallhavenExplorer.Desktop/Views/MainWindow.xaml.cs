@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using WallhavenExplorer.Desktop.ViewModels;
@@ -46,6 +47,18 @@ namespace WallhavenExplorer.Desktop.Views
             WallpaperImage.Stretch = Stretch.None;
             ImageScale.ScaleX = 1.0;
             ImageScale.ScaleY = 1.0;
+        }
+
+        private void HistoryListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // // AkonDeV 06/2026
+            if (sender is ListBox listBox && listBox.SelectedItem is string query)
+            {
+                if (DataContext is MainViewModel vm)
+                {
+                    _ = vm.SearchQueryFromHistoryAsync(query);
+                }
+            }
         }
     }
 }

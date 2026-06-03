@@ -14,11 +14,18 @@ namespace WallhavenExplorer.Desktop.Repositories
         private readonly string _dbPath;
         private readonly string _connectionString;
 
-        public DatabaseService()
+        public DatabaseService(string? customDbPath = null)
         {
             // // AkonDeV 06/2026
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            _dbPath = Path.Combine(appData, "WallhavenExplorer", "localdata.db");
+            if (customDbPath != null)
+            {
+                _dbPath = customDbPath;
+            }
+            else
+            {
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                _dbPath = Path.Combine(appData, "WallhavenExplorer", "localdata.db");
+            }
             _connectionString = $"Data Source={_dbPath};";
         }
 
