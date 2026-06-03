@@ -110,6 +110,29 @@
                 <TextBlock Text="{Binding SelectedWallpaper.Uploader, StringFormat='Autor: {0}'}" Margin="0,4"/>
 
                 <Button Command="{Binding DownloadOriginalCommand}" Content="Descargar Original" Margin="0,20,0,0" Height="35" Background="#28A745" Foreground="White" BorderThickness="0"/>
+                
+                <!-- Redimensionador Móvil -->
+                <Border BorderBrush="#333333" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,15,0,0" Background="#1A1A1A">
+                    <StackPanel>
+                        <TextBlock Text="REDIMENSIONAR MÓVIL" FontSize="14" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,10"/>
+                        
+                        <TextBlock Text="Resolución:" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,3"/>
+                        <ComboBox SelectedValue="{Binding SelectedResizeResolution}" SelectedValuePath="Content" Height="25" Margin="0,0,0,10">
+                            <ComboBoxItem Content="1080x1920" IsSelected="True"/>
+                            <ComboBoxItem Content="1440x2560"/>
+                            <ComboBoxItem Content="720x1280"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Modo:" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,3"/>
+                        <ComboBox SelectedValue="{Binding SelectedResizeMode}" SelectedValuePath="Content" Height="25" Margin="0,0,0,15">
+                            <ComboBoxItem Content="SmartCropCentred" IsSelected="True"/>
+                            <ComboBoxItem Content="LetterboxBlack"/>
+                            <ComboBoxItem Content="ScaleMaintainAspect"/>
+                        </ComboBox>
+
+                        <Button Command="{Binding CreateMobileVersionCommand}" Content="Crear Versión Móvil" Height="30" Background="#17A2B8" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Grid>
 

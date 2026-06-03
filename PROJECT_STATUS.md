@@ -16,7 +16,7 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
 - [x] **Punto 3: Búsqueda con Filtros Completos y Paginación** | *AkonDeV 03/06/2026*
   - Diseño: Vinculación de query string avanzada y límites de API.
   - UI: Panel de filtros (Categorías, Purity, Ordenación) y barra de paginación.
-- [ ] **Punto 4: Redimensionador Móvil Avanzado**
+- [x] **Punto 4: Redimensionador Móvil Avanzado** | *AkonDeV 03/06/2026*
   - Diseño: Orquestación de recorte y padding en ImageSharp.
   - UI: Selector de relación de aspecto y resolución móvil.
 - [ ] **Punto 5: Gestión de Favoritos e Historial Local**

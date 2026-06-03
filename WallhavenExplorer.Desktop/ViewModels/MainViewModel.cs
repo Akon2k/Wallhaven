@@ -44,6 +44,10 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private string _selectedSorting = "relevance";
         [ObservableProperty] private string _selectedOrder = "desc";
 
+        // Redimensionamiento móvil
+        [ObservableProperty] private string _selectedResizeResolution = "1080x1920";
+        [ObservableProperty] private string _selectedResizeMode = "SmartCropCentred";
+
         [ObservableProperty] private double _downloadProgress;
         [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private string _statusMessage = "Listo";
@@ -256,6 +260,74 @@ namespace WallhavenExplorer.Desktop.ViewModels
             {
                 Log.Error(ex, "Fallo al descargar wallpaper id {Id}", SelectedWallpaper.Id);
                 StatusMessage = "Fallo en la descarga de archivos.";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task CreateMobileVersionAsync()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return;
+
+            IsLoading = true;
+            StatusMessage = "Iniciando procesamiento móvil...";
+            DownloadProgress = 0;
+
+            try
+            {
+                var config = await _configService.LoadConfigAsync();
+                
+                // 1. Obtener imagen origen local (desde la caché local)
+                string sourcePath = await _imageCacheService.GetCachedImagePathAsync(SelectedWallpaper.Id, SelectedWallpaper.Path);
+                
+                if (!File.Exists(sourcePath))
+                {
+                    StatusMessage = "No se pudo obtener la imagen origen local.";
+                    return;
+                }
+
+                // 2. Determinar la resolución destino
+                int width = 1080;
+                int height = 1920;
+                string res = SelectedResizeResolution ?? config.DefaultResizeSize ?? "1080x1920";
+                var parts = res.Split('x');
+                if (parts.Length == 2 && int.TryParse(parts[0], out int w) && int.TryParse(parts[1], out int h))
+                {
+                    width = w;
+                    height = h;
+                }
+
+                // 3. Determinar el modo de redimensionamiento
+                Core.Services.ResizeMode mode = Core.Services.ResizeMode.SmartCropCentred;
+                if (Enum.TryParse<Core.Services.ResizeMode>(SelectedResizeMode, out var parsedMode))
+                {
+                    mode = parsedMode;
+                }
+
+                // 4. Determinar la carpeta de destino
+                string targetFolder = !string.IsNullOrWhiteSpace(config.MobileDirectory)
+                    ? config.MobileDirectory
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "WallhavenMobile");
+
+                if (!Directory.Exists(targetFolder)) Directory.CreateDirectory(targetFolder);
+
+                string extension = Path.GetExtension(SelectedWallpaper.Path) ?? ".jpg";
+                string targetPath = Path.Combine(targetFolder, $"{SelectedWallpaper.Id}_{width}x{height}_{mode}{extension}");
+
+                // 5. Procesar imagen
+                StatusMessage = "Procesando y redimensionando imagen...";
+                await _imageProcessorService.ProcessMobileResizeAsync(sourcePath, targetPath, width, height, mode);
+
+                StatusMessage = $"Versión móvil guardada con éxito en: {targetPath}";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al crear la versión móvil para el wallpaper ID {Id}", SelectedWallpaper.Id);
+                StatusMessage = "Fallo al procesar la imagen móvil.";
             }
             finally
             {
