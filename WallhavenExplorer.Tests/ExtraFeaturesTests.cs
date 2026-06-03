@@ -117,5 +117,120 @@ namespace WallhavenExplorer.Tests
             Assert.Empty(vm.SearchQuery);
             Assert.Equal(1, vm.CurrentPage);
         }
+
+        [Fact]
+        public void NavigateFirstLastNextPrevious_InSearchResultsList_WorksCorrectly()
+        {
+            // // AkonDeV 06/2026
+            var vm = new MainViewModel(
+                new MockWallhavenService(),
+                new MockImageProcessorService(),
+                new MockDatabaseService(),
+                new MockConfigurationService(),
+                new MockImageCacheService(),
+                new MockServiceProvider()
+            );
+
+            vm.Wallpapers.Clear();
+            vm.FavoriteWallpapers.Clear();
+
+            var wp1 = new Wallpaper { Id = "w1", Path = "url1" };
+            var wp2 = new Wallpaper { Id = "w2", Path = "url2" };
+            var wp3 = new Wallpaper { Id = "w3", Path = "url3" };
+
+            vm.Wallpapers.Add(wp1);
+            vm.Wallpapers.Add(wp2);
+            vm.Wallpapers.Add(wp3);
+
+            vm.SelectedTabIndex = 0; // Búsqueda activa
+            vm.SelectedWallpaper = wp1;
+
+            // Avanzar
+            Assert.True(vm.NavigateNextCommand.CanExecute(null));
+            vm.NavigateNextCommand.Execute(null);
+            Assert.Equal(wp2, vm.SelectedWallpaper);
+
+            // Ir al último
+            Assert.True(vm.NavigateLastCommand.CanExecute(null));
+            vm.NavigateLastCommand.Execute(null);
+            Assert.Equal(wp3, vm.SelectedWallpaper);
+            Assert.False(vm.NavigateNextCommand.CanExecute(null));
+
+            // Retroceder
+            Assert.True(vm.NavigatePreviousCommand.CanExecute(null));
+            vm.NavigatePreviousCommand.Execute(null);
+            Assert.Equal(wp2, vm.SelectedWallpaper);
+
+            // Ir al primero
+            Assert.True(vm.NavigateFirstCommand.CanExecute(null));
+            vm.NavigateFirstCommand.Execute(null);
+            Assert.Equal(wp1, vm.SelectedWallpaper);
+            Assert.False(vm.NavigatePreviousCommand.CanExecute(null));
+        }
+
+        [Fact]
+        public void NavigateFirstLastNextPrevious_InFavoritesList_WorksCorrectly()
+        {
+            // // AkonDeV 06/2026
+            var vm = new MainViewModel(
+                new MockWallhavenService(),
+                new MockImageProcessorService(),
+                new MockDatabaseService(),
+                new MockConfigurationService(),
+                new MockImageCacheService(),
+                new MockServiceProvider()
+            );
+
+            vm.Wallpapers.Clear();
+            vm.FavoriteWallpapers.Clear();
+
+            var fav1 = new Wallpaper { Id = "f1", Path = "url1" };
+            var fav2 = new Wallpaper { Id = "f2", Path = "url2" };
+
+            vm.FavoriteWallpapers.Add(fav1);
+            vm.FavoriteWallpapers.Add(fav2);
+
+            // Importante: pestaña de Favoritos = 1
+            vm.SelectedTabIndex = 1; 
+            vm.SelectedWallpaper = fav1;
+
+            Assert.True(vm.NavigateNextCommand.CanExecute(null));
+            vm.NavigateNextCommand.Execute(null);
+            Assert.Equal(fav2, vm.SelectedWallpaper);
+
+            Assert.False(vm.NavigateNextCommand.CanExecute(null));
+            Assert.True(vm.NavigatePreviousCommand.CanExecute(null));
+        }
+
+        [Fact]
+        public void CanExecute_ReflectsRelativePosition_InCollections()
+        {
+            // // AkonDeV 06/2026
+            var vm = new MainViewModel(
+                new MockWallhavenService(),
+                new MockImageProcessorService(),
+                new MockDatabaseService(),
+                new MockConfigurationService(),
+                new MockImageCacheService(),
+                new MockServiceProvider()
+            );
+
+            vm.Wallpapers.Clear();
+            vm.FavoriteWallpapers.Clear();
+
+            // Si está vacío, nada puede ejecutarse
+            Assert.False(vm.NavigateNextCommand.CanExecute(null));
+            Assert.False(vm.NavigatePreviousCommand.CanExecute(null));
+
+            var wp = new Wallpaper { Id = "w1" };
+            vm.Wallpapers.Add(wp);
+            vm.SelectedWallpaper = wp;
+
+            // Con un solo elemento, no hay siguiente ni anterior
+            Assert.False(vm.NavigateNextCommand.CanExecute(null));
+            Assert.False(vm.NavigatePreviousCommand.CanExecute(null));
+            Assert.False(vm.NavigateFirstCommand.CanExecute(null));
+            Assert.False(vm.NavigateLastCommand.CanExecute(null));
+        }
     }
 }

@@ -35,6 +35,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private bool _isFavorite;
         [ObservableProperty] private bool _isSlideshowActive;
         [ObservableProperty] private bool _isFullScreen;
+        [ObservableProperty] private int _selectedTabIndex; // // AkonDeV 06/2026
         
         // Paginación
         [ObservableProperty] private int _currentPage = 1;
@@ -58,14 +59,26 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private string _statusMessage = "Listo";
 
+        private IList<Wallpaper> GetActiveNavigationList()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedTabIndex == 1)
+            {
+                return FavoriteWallpapers;
+            }
+            return Wallpapers;
+        }
+
         public string ImagePositionText
         {
             get
             {
                 // // AkonDeV 06/2026
-                if (Wallpapers.Count == 0 || SelectedWallpaper == null) return "Sin imágenes";
-                int index = Wallpapers.IndexOf(SelectedWallpaper) + 1;
-                return $"Imagen {index} de {Wallpapers.Count}";
+                var list = GetActiveNavigationList();
+                if (list == null || list.Count == 0 || SelectedWallpaper == null) return "Sin imágenes";
+                int index = list.IndexOf(SelectedWallpaper) + 1;
+                if (index <= 0) return "Sin imágenes";
+                return $"Imagen {index} de {list.Count}";
             }
         }
 
@@ -96,6 +109,63 @@ namespace WallhavenExplorer.Desktop.ViewModels
             // // AkonDeV 06/2026
             _ = UpdateDisplayedImageAsync(value);
             OnPropertyChanged(nameof(ImagePositionText));
+            NotifyNavigationCommandsCanExecuteChanged();
+        }
+
+        partial void OnSelectedTabIndexChanged(int value)
+        {
+            // // AkonDeV 06/2026
+            OnPropertyChanged(nameof(ImagePositionText));
+            NotifyNavigationCommandsCanExecuteChanged();
+        }
+
+        private void NotifyNavigationCommandsCanExecuteChanged()
+        {
+            // // AkonDeV 06/2026
+            NavigateFirstCommand.NotifyCanExecuteChanged();
+            NavigatePreviousCommand.NotifyCanExecuteChanged();
+            NavigateNextCommand.NotifyCanExecuteChanged();
+            NavigateLastCommand.NotifyCanExecuteChanged();
+        }
+
+        private bool CanNavigateNext()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return false;
+            var list = GetActiveNavigationList();
+            if (list == null || list.Count == 0) return false;
+            int idx = list.IndexOf(SelectedWallpaper);
+            return idx >= 0 && idx < list.Count - 1;
+        }
+
+        private bool CanNavigatePrevious()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return false;
+            var list = GetActiveNavigationList();
+            if (list == null || list.Count == 0) return false;
+            int idx = list.IndexOf(SelectedWallpaper);
+            return idx > 0;
+        }
+
+        private bool CanNavigateFirst()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return false;
+            var list = GetActiveNavigationList();
+            if (list == null || list.Count == 0) return false;
+            int idx = list.IndexOf(SelectedWallpaper);
+            return idx > 0;
+        }
+
+        private bool CanNavigateLast()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return false;
+            var list = GetActiveNavigationList();
+            if (list == null || list.Count == 0) return false;
+            int idx = list.IndexOf(SelectedWallpaper);
+            return idx >= 0 && idx < list.Count - 1;
         }
 
         private async Task UpdateDisplayedImageAsync(Wallpaper? wp)
@@ -182,9 +252,11 @@ namespace WallhavenExplorer.Desktop.ViewModels
                 }
                 else
                 {
+                    SelectedWallpaper = null;
                     StatusMessage = "No se encontraron resultados.";
                 }
 
+                NotifyNavigationCommandsCanExecuteChanged();
                 await _databaseService.SaveSearchHistoryAsync(SearchQuery, "{}");
                 await LoadHistoryAsync();
             }
@@ -225,47 +297,51 @@ namespace WallhavenExplorer.Desktop.ViewModels
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanNavigateNext))]
         public void NavigateNext()
         {
             // // AkonDeV 06/2026
-            if (Wallpapers.Count == 0 || SelectedWallpaper == null) return;
-            int currentIndex = Wallpapers.IndexOf(SelectedWallpaper);
-            if (currentIndex < Wallpapers.Count - 1)
+            var list = GetActiveNavigationList();
+            if (list == null || list.Count == 0 || SelectedWallpaper == null) return;
+            int currentIndex = list.IndexOf(SelectedWallpaper);
+            if (currentIndex >= 0 && currentIndex < list.Count - 1)
             {
-                SelectedWallpaper = Wallpapers[currentIndex + 1];
+                SelectedWallpaper = list[currentIndex + 1];
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanNavigatePrevious))]
         public void NavigatePrevious()
         {
             // // AkonDeV 06/2026
-            if (Wallpapers.Count == 0 || SelectedWallpaper == null) return;
-            int currentIndex = Wallpapers.IndexOf(SelectedWallpaper);
+            var list = GetActiveNavigationList();
+            if (list == null || list.Count == 0 || SelectedWallpaper == null) return;
+            int currentIndex = list.IndexOf(SelectedWallpaper);
             if (currentIndex > 0)
             {
-                SelectedWallpaper = Wallpapers[currentIndex - 1];
+                SelectedWallpaper = list[currentIndex - 1];
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanNavigateFirst))]
         public void NavigateFirst()
         {
             // // AkonDeV 06/2026
-            if (Wallpapers.Count > 0)
+            var list = GetActiveNavigationList();
+            if (list != null && list.Count > 0)
             {
-                SelectedWallpaper = Wallpapers[0];
+                SelectedWallpaper = list[0];
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanNavigateLast))]
         public void NavigateLast()
         {
             // // AkonDeV 06/2026
-            if (Wallpapers.Count > 0)
+            var list = GetActiveNavigationList();
+            if (list != null && list.Count > 0)
             {
-                SelectedWallpaper = Wallpapers[Wallpapers.Count - 1];
+                SelectedWallpaper = list[list.Count - 1];
             }
         }
 
@@ -420,6 +496,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
                 {
                     FavoriteWallpapers.Add(fav);
                 }
+                NotifyNavigationCommandsCanExecuteChanged();
             }
             catch (Exception ex)
             {

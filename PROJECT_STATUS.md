@@ -24,3 +24,7 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
   - UI: Vista lateral de favoritos y buscador histórico.
 - [x] **Punto 6: Características Extra (Slideshow, Pantalla Completa, Portapapeles, Navegador)** | *AkonDeV 03/06/2026*
   - Diseño: Temporizadores de slideshow y llamadas a procesos del sistema.
+- [x] **Punto 7: Control de Calidad, Navegación Contextual y Habilitación de Botones (CanExecute)** | *AkonDeV 03/06/2026*
+  - Diseño: Inclusión de reglas de testing de integración en el framework FDA-IA. Lógica contextual de navegación entre búsquedas y favoritos.
+  - UI: Enlace de TabControl para detectar la pestaña activa y deshabilitado dinámico (CanExecute) de botones de navegación.
+  - Testing: Incorporación de pruebas de integración reales en ExtraFeaturesTests.cs simulando navegación y verificando CanExecute.

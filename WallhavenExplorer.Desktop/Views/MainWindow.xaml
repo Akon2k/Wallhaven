@@ -152,7 +152,7 @@
                 </Border>
             </Grid>
 
-            <TabControl Grid.Column="1" Margin="15,0,0,0" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1">
+            <TabControl SelectedIndex="{Binding SelectedTabIndex}" Grid.Column="1" Margin="15,0,0,0" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1">
                 <TabControl.Style>
                     <Style TargetType="TabControl">
                         <Style.Triggers>
