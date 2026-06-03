@@ -10,6 +10,7 @@ namespace WallhavenExplorer.Core.Models
         public string Sorting { get; set; } = "date_added";
         public string Order { get; set; } = "desc";
         public string ApiKey { get; set; } = string.Empty;
+        public string Ratios { get; set; } = "16x9,16x10,21x9";
         public List<string> Colors { get; set; } = new();
         public List<string> Resolutions { get; set; } = new();
     }

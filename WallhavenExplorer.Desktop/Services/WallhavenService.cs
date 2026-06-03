@@ -34,8 +34,9 @@ namespace WallhavenExplorer.Desktop.Services
             string purity = filters != null ? filters.Purity : "100";
             string sorting = filters != null ? filters.Sorting : "relevance";
             string apiKeyParam = !string.IsNullOrEmpty(filters?.ApiKey) ? $"&apikey={filters.ApiKey}" : "";
+            string ratiosParam = !string.IsNullOrEmpty(filters?.Ratios) ? $"&ratios={filters.Ratios}" : "";
 
-            string url = $"search?q={Uri.EscapeDataString(query)}&categories={categories}&purity={purity}&sorting={sorting}&page={page}{apiKeyParam}";
+            string url = $"search?q={Uri.EscapeDataString(query)}&categories={categories}&purity={purity}&sorting={sorting}&page={page}{apiKeyParam}{ratiosParam}";
 
             HttpResponseMessage response = await client.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
