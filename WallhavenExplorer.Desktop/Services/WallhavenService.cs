@@ -15,6 +15,8 @@ namespace WallhavenExplorer.Desktop.Services
     {
         private readonly IHttpClientFactory _clientFactory;
 
+        public string ApiKey { get; set; } = string.Empty;
+
         public WallhavenService(IHttpClientFactory clientFactory)
         {
             // // AkonDeV 06/2026
@@ -79,7 +81,8 @@ namespace WallhavenExplorer.Desktop.Services
         {
             // // AkonDeV 06/2026
             var client = _clientFactory.CreateClient("WallhavenClient");
-            HttpResponseMessage response = await client.GetAsync($"w/{id}", cancellationToken);
+            string apiKeyParam = !string.IsNullOrEmpty(ApiKey) ? $"?apikey={ApiKey}" : "";
+            HttpResponseMessage response = await client.GetAsync($"w/{id}{apiKeyParam}", cancellationToken);
             response.EnsureSuccessStatusCode();
 
             string jsonString = await response.Content.ReadAsStringAsync(cancellationToken);

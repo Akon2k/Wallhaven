@@ -9,6 +9,8 @@ namespace WallhavenExplorer.Core.Services
     public interface IWallhavenService
     {
         // AkonDeV 06/2026
+        string ApiKey { get; set; }
+
         Task<Tuple<IEnumerable<Wallpaper>, int>> SearchWallpapersAsync(
             string query, 
             SearchFilters filters, 

@@ -35,6 +35,9 @@ namespace WallhavenExplorer.Desktop.ViewModels
             _wallhavenService = whService;
             _imageProcessorService = imgService;
             _databaseService = dbService;
+            
+            // Búsqueda automática inicial al cargar la aplicación
+            _ = ExecuteSearchAsync();
         }
 
         [RelayCommand]
