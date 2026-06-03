@@ -3,10 +3,64 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WallhavenExplorer.Desktop.Views"
         mc:Ignorable="d"
-        Title="{Binding SettingsTitle}" Height="300" Width="400">
-    <Grid>
-        <TextBlock Text="Configuración - Fase 1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+        Title="{Binding SettingsTitle}" Height="400" Width="500"
+        Background="#121212" Foreground="#FFFFFF" WindowStartupLocation="CenterOwner">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="CONFIGURACIÓN" FontSize="20" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,20"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- API Key -->
+                <TextBlock Text="API Key de Wallhaven" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding ApiKey, UpdateSourceTrigger=PropertyChanged}" Background="#1E1E1E" Foreground="#FFFFFF" BorderBrush="#333333" Height="30" Padding="5,3" Margin="0,0,0,15" VerticalContentAlignment="Center"/>
+
+                <!-- Carpeta Descargas -->
+                <TextBlock Text="Carpeta de descargas originales" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding DownloadDirectory, UpdateSourceTrigger=PropertyChanged}" Background="#1E1E1E" Foreground="#FFFFFF" BorderBrush="#333333" Height="30" Padding="5,3" Margin="0,0,0,15" VerticalContentAlignment="Center"/>
+
+                <!-- Carpeta Mobile -->
+                <TextBlock Text="Carpeta de descargas móviles" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding MobileDirectory, UpdateSourceTrigger=PropertyChanged}" Background="#1E1E1E" Foreground="#FFFFFF" BorderBrush="#333333" Height="30" Padding="5,3" Margin="0,0,0,15" VerticalContentAlignment="Center"/>
+
+                <!-- Combos de Ajustes -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Tamaño por defecto" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,5"/>
+                        <ComboBox SelectedValue="{Binding DefaultResizeSize}" SelectedValuePath="Content" Height="30">
+                            <ComboBoxItem Content="1080x1920" IsSelected="True"/>
+                            <ComboBoxItem Content="1440x2560"/>
+                            <ComboBoxItem Content="720x1280"/>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="Tema" FontSize="12" Foreground="#AAAAAA" Margin="0,0,0,5"/>
+                        <ComboBox SelectedValue="{Binding Theme}" SelectedValuePath="Content" Height="30">
+                            <ComboBoxItem Content="Dark" IsSelected="True"/>
+                            <ComboBoxItem Content="Light"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Botones y Estado -->
+        <StackPanel Grid.Row="2" Margin="0,15,0,0">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#28A745" HorizontalAlignment="Center" Margin="0,0,0,10" FontWeight="Bold"/>
+            <Button Command="{Binding SaveSettingsCommand}" Content="GUARDAR" Height="35" Background="#007ACC" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+        </StackPanel>
     </Grid>
 </Window>

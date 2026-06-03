@@ -24,11 +24,14 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
                      Background="#1E1E1E" Foreground="#FFFFFF" BorderBrush="#333333" Height="35" Padding="5,7,5,5" VerticalContentAlignment="Center" FontSize="14"/>
             <Button Grid.Column="1" Command="{Binding ExecuteSearchCommand}" Content="BUSCAR" Width="120" Margin="10,0,0,0" 
                     Background="#007ACC" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+            <Button Grid.Column="2" Command="{Binding OpenSettingsCommand}" Content="AJUSTES" Width="100" Margin="10,0,0,0" 
+                    Background="#333333" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
         </Grid>
 
         <Grid Grid.Row="1">

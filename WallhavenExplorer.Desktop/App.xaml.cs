@@ -30,6 +30,7 @@ namespace WallhavenExplorer.Desktop
                     });
 
                     // Servicios Core
+                    services.AddSingleton<IConfigurationService, Services.ConfigurationService>();
                     services.AddSingleton<IDatabaseService, Repositories.DatabaseService>();
                     services.AddSingleton<IImageProcessorService, Services.ImageProcessorService>();
                     services.AddSingleton<IWallhavenService, Services.WallhavenService>();
@@ -50,6 +51,12 @@ namespace WallhavenExplorer.Desktop
             
             var dbService = AppHost.Services.GetRequiredService<IDatabaseService>();
             await dbService.InitializeDatabaseAsync();
+
+            // Cargar configuración de inicio y sincronizar API Key con el servicio
+            var configService = AppHost.Services.GetRequiredService<IConfigurationService>();
+            var config = await configService.LoadConfigAsync();
+            var wallhavenService = AppHost.Services.GetRequiredService<IWallhavenService>();
+            wallhavenService.ApiKey = config.ApiKey;
 
             var mainWindow = AppHost.Services.GetRequiredService<Views.MainWindow>();
             mainWindow.Show();

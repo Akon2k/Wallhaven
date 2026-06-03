@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using WallhavenExplorer.Core.Models;
 using WallhavenExplorer.Core.Services;
 using Serilog;
@@ -17,6 +19,8 @@ namespace WallhavenExplorer.Desktop.ViewModels
         private readonly IWallhavenService _wallhavenService;
         private readonly IImageProcessorService _imageProcessorService;
         private readonly IDatabaseService _databaseService;
+        private readonly IConfigurationService _configService;
+        private readonly IServiceProvider _serviceProvider;
         private CancellationTokenSource? _searchCts;
 
         [ObservableProperty] private string _title = "Wallhaven Explorer";
@@ -29,12 +33,19 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private string _statusMessage = "Listo";
 
-        public MainViewModel(IWallhavenService whService, IImageProcessorService imgService, IDatabaseService dbService)
+        public MainViewModel(
+            IWallhavenService whService, 
+            IImageProcessorService imgService, 
+            IDatabaseService dbService,
+            IConfigurationService configService,
+            IServiceProvider serviceProvider)
         {
             // // AkonDeV 06/2026
             _wallhavenService = whService;
             _imageProcessorService = imgService;
             _databaseService = dbService;
+            _configService = configService;
+            _serviceProvider = serviceProvider;
             
             // Búsqueda automática inicial al cargar la aplicación
             _ = ExecuteSearchAsync();
@@ -53,7 +64,15 @@ namespace WallhavenExplorer.Desktop.ViewModels
 
             try
             {
-                var filters = new SearchFilters { Categories = "111", Purity = "100", Sorting = "relevance" };
+                var config = await _configService.LoadConfigAsync();
+                var filters = new SearchFilters 
+                { 
+                    Categories = "111", 
+                    Purity = "100", 
+                    Sorting = "relevance",
+                    ApiKey = config.ApiKey 
+                };
+                
                 var result = await _wallhavenService.SearchWallpapersAsync(SearchQuery, filters, CurrentPage, _searchCts.Token);
 
                 Wallpapers.Clear();
@@ -120,7 +139,11 @@ namespace WallhavenExplorer.Desktop.ViewModels
             // // AkonDeV 06/2026
             if (SelectedWallpaper == null) return;
 
-            string targetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "WallhavenDownloads");
+            var config = await _configService.LoadConfigAsync();
+            string targetFolder = !string.IsNullOrWhiteSpace(config.DownloadDirectory)
+                ? config.DownloadDirectory
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "WallhavenDownloads");
+
             if (!Directory.Exists(targetFolder)) Directory.CreateDirectory(targetFolder);
 
             string extension = Path.GetExtension(SelectedWallpaper.Path) ?? ".jpg";
@@ -139,7 +162,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
             try
             {
                 await _wallhavenService.DownloadFileAsync(SelectedWallpaper.Path, targetPath, progressReporter, CancellationToken.None);
-                StatusMessage = $"Descarga finalizada con éxito en Pictures/WallhavenDownloads.";
+                StatusMessage = $"Descarga finalizada con éxito en: {targetPath}";
             }
             catch (Exception ex)
             {
@@ -150,6 +173,18 @@ namespace WallhavenExplorer.Desktop.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        public void OpenSettings()
+        {
+            // // AkonDeV 06/2026
+            var settingsWindow = _serviceProvider.GetRequiredService<Views.SettingsWindow>();
+            if (Application.Current.MainWindow is Window mainWin)
+            {
+                settingsWindow.Owner = mainWin;
+            }
+            settingsWindow.ShowDialog();
         }
     }
 }
