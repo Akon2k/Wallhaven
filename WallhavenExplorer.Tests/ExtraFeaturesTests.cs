@@ -232,5 +232,41 @@ namespace WallhavenExplorer.Tests
             Assert.False(vm.NavigateFirstCommand.CanExecute(null));
             Assert.False(vm.NavigateLastCommand.CanExecute(null));
         }
+
+        [Fact]
+        public void ToggleGridView_ChangesStateCorrectly()
+        {
+            // // AkonDeV 06/2026
+            var vm = new MainViewModel(
+                new MockWallhavenService(),
+                new MockImageProcessorService(),
+                new MockDatabaseService(),
+                new MockConfigurationService(),
+                new MockImageCacheService(),
+                new MockServiceProvider()
+            );
+
+            Assert.True(vm.IsGridViewActive);
+            vm.ToggleGridViewCommand.Execute(null);
+            Assert.False(vm.IsGridViewActive);
+        }
+
+        [Fact]
+        public void ToggleDetailsPanel_ChangesStateCorrectly()
+        {
+            // // AkonDeV 06/2026
+            var vm = new MainViewModel(
+                new MockWallhavenService(),
+                new MockImageProcessorService(),
+                new MockDatabaseService(),
+                new MockConfigurationService(),
+                new MockImageCacheService(),
+                new MockServiceProvider()
+            );
+
+            Assert.True(vm.IsDetailsPanelOpen);
+            vm.ToggleDetailsPanelCommand.Execute(null);
+            Assert.False(vm.IsDetailsPanelOpen);
+        }
     }
 }

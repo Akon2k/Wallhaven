@@ -28,3 +28,7 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
   - Diseño: Inclusión de reglas de testing de integración en el framework FDA-IA. Lógica contextual de navegación entre búsquedas y favoritos.
   - UI: Enlace de TabControl para detectar la pestaña activa y deshabilitado dinámico (CanExecute) de botones de navegación.
   - Testing: Incorporación de pruebas de integración reales en ExtraFeaturesTests.cs simulando navegación y verificando CanExecute.
+- [x] **Punto 8: Rediseño Premium UX/UI e Interfaz Inmersiva** | *AkonDeV 03/06/2026*
+  - Diseño: Eliminación del TabControl por defecto. Barra lateral de iconos de navegación, grilla de resultados con WrapPanel en tarjetas y visor interactivo de pantalla dividida.
+  - UI: Estilos de tarjetas con zoom, gradientes oscuros en XAML, scrollbars y botones customizados y panel de detalles colapsable.
+  - Testing: Cobertura de tests para el control de visibilidad de paneles y grillas en ExtraFeaturesTests.cs.

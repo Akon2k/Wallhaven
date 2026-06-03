@@ -13,5 +13,8 @@ namespace WallhavenExplorer.Core.Models
         public List<string> Tags { get; set; } = new();
         public string Uploader { get; set; } = string.Empty;
         public string ShortUrl { get; set; } = string.Empty;
+        public string ThumbnailUrl => (Id.Length >= 2) // // AkonDeV 06/2026
+            ? $"https://th.wallhaven.cc/lg/{Id.Substring(0, 2)}/{Id}.jpg" 
+            : Path;
     }
 }

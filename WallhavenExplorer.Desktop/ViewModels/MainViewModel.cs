@@ -36,6 +36,8 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private bool _isSlideshowActive;
         [ObservableProperty] private bool _isFullScreen;
         [ObservableProperty] private int _selectedTabIndex; // // AkonDeV 06/2026
+        [ObservableProperty] private bool _isGridViewActive = true; // // AkonDeV 06/2026
+        [ObservableProperty] private bool _isDetailsPanelOpen = true; // // AkonDeV 06/2026
         
         // Paginación
         [ObservableProperty] private int _currentPage = 1;
@@ -657,6 +659,20 @@ namespace WallhavenExplorer.Desktop.ViewModels
                 settingsWindow.Owner = mainWin;
             }
             settingsWindow.ShowDialog();
+        }
+
+        [RelayCommand]
+        public void ToggleGridView()
+        {
+            // // AkonDeV 06/2026
+            IsGridViewActive = !IsGridViewActive;
+        }
+
+        [RelayCommand]
+        public void ToggleDetailsPanel()
+        {
+            // // AkonDeV 06/2026
+            IsDetailsPanelOpen = !IsDetailsPanelOpen;
         }
     }
 }
