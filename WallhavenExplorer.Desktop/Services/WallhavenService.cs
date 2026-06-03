@@ -49,20 +49,47 @@ namespace WallhavenExplorer.Desktop.Services
             {
                 foreach (var item in dataArray.EnumerateArray())
                 {
+                    // // AkonDeV 06/2026
+                    string wpId = item.TryGetProperty("id", out var idEl) ? idEl.GetString() ?? "" : "";
+                    string wpUrl = item.TryGetProperty("url", out var urlEl) ? urlEl.GetString() ?? "" : "";
+                    string wpPath = item.TryGetProperty("path", out var pathEl) ? pathEl.GetString() ?? "" : "";
+                    string wpResolution = item.TryGetProperty("resolution", out var resEl) ? resEl.GetString() ?? "" : "";
+                    string wpCategory = item.TryGetProperty("category", out var catEl) ? catEl.GetString() ?? "" : "";
+                    string wpShortUrl = item.TryGetProperty("short_url", out var sUrlEl) ? sUrlEl.GetString() ?? "" : "";
+
+                    string wpUploader = "";
+                    if (item.TryGetProperty("uploader", out var uploaderEl))
+                    {
+                        if (uploaderEl.ValueKind == JsonValueKind.Object && uploaderEl.TryGetProperty("username", out var userEl))
+                        {
+                            wpUploader = userEl.GetString() ?? "";
+                        }
+                        else if (uploaderEl.ValueKind == JsonValueKind.String)
+                        {
+                            wpUploader = uploaderEl.GetString() ?? "";
+                        }
+                    }
+
                     var wp = new Wallpaper
                     {
-                        Id = item.GetProperty("id").GetString() ?? string.Empty,
-                        Url = item.GetProperty("url").GetString() ?? string.Empty,
-                        Path = item.GetProperty("path").GetString() ?? string.Empty,
-                        Resolution = item.GetProperty("resolution").GetString() ?? string.Empty,
-                        Category = item.GetProperty("category").GetString() ?? string.Empty,
-                        Uploader = item.GetProperty("uploader").TryGetProperty("username", out var user) ? user.GetString() ?? "" : "",
-                        ShortUrl = item.GetProperty("short_url").GetString() ?? string.Empty
+                        Id = wpId,
+                        Url = wpUrl,
+                        Path = wpPath,
+                        Resolution = wpResolution,
+                        Category = wpCategory,
+                        Uploader = wpUploader,
+                        ShortUrl = wpShortUrl
                     };
 
                     if (item.TryGetProperty("tags", out var tagsProp) && tagsProp.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var t in tagsProp.EnumerateArray()) wp.Tags.Add(t.GetProperty("name").GetString() ?? "");
+                        foreach (var t in tagsProp.EnumerateArray())
+                        {
+                            if (t.TryGetProperty("name", out var nameProp))
+                            {
+                                wp.Tags.Add(nameProp.GetString() ?? "");
+                            }
+                        }
                     }
                     list.Add(wp);
                 }
