@@ -33,6 +33,7 @@ namespace WallhavenExplorer.Desktop
                     services.AddSingleton<IConfigurationService, Services.ConfigurationService>();
                     services.AddSingleton<IDatabaseService, Repositories.DatabaseService>();
                     services.AddSingleton<IImageProcessorService, Services.ImageProcessorService>();
+                    services.AddSingleton<IImageCacheService, Services.ImageCacheService>();
                     services.AddSingleton<IWallhavenService, Services.WallhavenService>();
 
                     // UI / MVVM

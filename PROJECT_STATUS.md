@@ -10,7 +10,7 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
   - Diseño: Persistencia de configuración en `config.json` e inyección de dependencias.
   - UI: Ventana de configuración que permite modificar API Key, carpetas y tema (claro/oscuro).
   - Testing: Pruebas de guardado/lectura de configuración.
-- [ ] **Punto 2: Caché Local de Imágenes e Interfaz de Visualización con Zoom**
+- [x] **Punto 2: Caché Local de Imágenes e Interfaz de Visualización con Zoom** | *AkonDeV 03/06/2026*
   - Diseño: Control de caché local e integración con visualizador.
   - UI: Visualización avanzada, soporte para zoom con rueda, ajuste automático y tamaño real.
 - [ ] **Punto 3: Búsqueda con Filtros Completos y Paginación**

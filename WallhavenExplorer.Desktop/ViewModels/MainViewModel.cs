@@ -20,6 +20,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
         private readonly IImageProcessorService _imageProcessorService;
         private readonly IDatabaseService _databaseService;
         private readonly IConfigurationService _configService;
+        private readonly IImageCacheService _imageCacheService;
         private readonly IServiceProvider _serviceProvider;
         private CancellationTokenSource? _searchCts;
 
@@ -27,6 +28,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private string _searchQuery = string.Empty;
         [ObservableProperty] private ObservableCollection<Wallpaper> _wallpapers = new();
         [ObservableProperty] private Wallpaper? _selectedWallpaper;
+        [ObservableProperty] private string _displayedImagePath = string.Empty;
         [ObservableProperty] private int _currentPage = 1;
         [ObservableProperty] private int _maxPages = 1;
         [ObservableProperty] private double _downloadProgress;
@@ -38,6 +40,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
             IImageProcessorService imgService, 
             IDatabaseService dbService,
             IConfigurationService configService,
+            IImageCacheService imageCacheService,
             IServiceProvider serviceProvider)
         {
             // // AkonDeV 06/2026
@@ -45,10 +48,46 @@ namespace WallhavenExplorer.Desktop.ViewModels
             _imageProcessorService = imgService;
             _databaseService = dbService;
             _configService = configService;
+            _imageCacheService = imageCacheService;
             _serviceProvider = serviceProvider;
             
             // Búsqueda automática inicial al cargar la aplicación
             _ = ExecuteSearchAsync();
+        }
+
+        partial void OnSelectedWallpaperChanged(Wallpaper? value)
+        {
+            // // AkonDeV 06/2026
+            _ = UpdateDisplayedImageAsync(value);
+        }
+
+        private async Task UpdateDisplayedImageAsync(Wallpaper? wp)
+        {
+            // // AkonDeV 06/2026
+            if (wp == null)
+            {
+                DisplayedImagePath = string.Empty;
+                return;
+            }
+
+            IsLoading = true;
+            StatusMessage = "Cargando imagen...";
+            try
+            {
+                string localPath = await _imageCacheService.GetCachedImagePathAsync(wp.Id, wp.Path);
+                DisplayedImagePath = localPath;
+                StatusMessage = $"Mostrando wallpaper ID: {wp.Id}";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al cargar el wallpaper a la vista.");
+                DisplayedImagePath = wp.Path; // Fallback a URL original
+                StatusMessage = "Error al cachear; mostrando imagen de forma remota.";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         [RelayCommand]

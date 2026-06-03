@@ -40,12 +40,32 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#1A1A1A" CornerRadius="4" BorderBrush="#2D2D2D" BorderThickness="1">
-                <Grid>
-                    <Image Source="{Binding SelectedWallpaper.Path}" Stretch="Uniform" Margin="10"/>
-                    <ProgressBar Value="{Binding DownloadProgress}" Maximum="100" Height="4" VerticalAlignment="Bottom" Foreground="#007ACC" Background="Transparent" BorderThickness="0" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter} , FallbackValue=Collapsed}"/>
-                </Grid>
-            </Border>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                    <Button Content="Ajustar a ventana" Click="FitToWindow_Click" Margin="0,0,10,0" Padding="8,4" Background="#2A2A2A" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                    <Button Content="Tamaño real" Click="ActualSize_Click" Padding="8,4" Background="#2A2A2A" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                </StackPanel>
+
+                <Border Grid.Row="1" Background="#1A1A1A" CornerRadius="4" BorderBrush="#2D2D2D" BorderThickness="1">
+                    <Grid>
+                        <ScrollViewer x:Name="ImageScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MouseWheel="ImageScrollViewer_MouseWheel">
+                            <Image Source="{Binding DisplayedImagePath}" Stretch="Uniform" x:Name="WallpaperImage" RenderTransformOrigin="0.5,0.5" Margin="10">
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform x:Name="ImageScale" ScaleX="1" ScaleY="1"/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </ScrollViewer>
+                        <ProgressBar Value="{Binding DownloadProgress}" Maximum="100" Height="4" VerticalAlignment="Bottom" Foreground="#007ACC" Background="Transparent" BorderThickness="0" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter} , FallbackValue=Collapsed}"/>
+                    </Grid>
+                </Border>
+            </Grid>
 
             <StackPanel Grid.Column="1" Margin="15,0,0,0">
                 <TextBlock Text="INFORMACIÓN" FontSize="16" FontWeight="Bold" Foreground="#007ACC" Margin="0,0,0,10"/>
