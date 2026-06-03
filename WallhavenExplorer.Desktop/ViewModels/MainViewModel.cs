@@ -75,7 +75,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
             _serviceProvider = serviceProvider;
             
             // Búsqueda automática inicial al cargar la aplicación
-            _ = ExecuteSearchAsync();
+            _ = GetRandomWallpaperAsync();
             _ = LoadFavoritesAsync();
             _ = LoadHistoryAsync();
         }
