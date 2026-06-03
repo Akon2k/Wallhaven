@@ -1,7 +1,7 @@
 <Window x:Class="WallhavenExplorer.Desktop.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Wallhaven Ultra Explorer .NET 8" Height="700" Width="1100"
+        Title="Wallhaven Ultra Explorer .NET 8" Height="750" Width="1100"
         Background="#121212" Foreground="#FFFFFF" WindowStartupLocation="CenterScreen">
     
     <Window.Resources>
@@ -18,20 +18,55 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
+            
+            <!-- Fila 0: Búsqueda -->
+            <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
                      Background="#1E1E1E" Foreground="#FFFFFF" BorderBrush="#333333" Height="35" Padding="5,7,5,5" VerticalContentAlignment="Center" FontSize="14"/>
-            <Button Grid.Column="1" Command="{Binding ExecuteSearchCommand}" Content="BUSCAR" Width="120" Margin="10,0,0,0" 
+            <Button Grid.Row="0" Grid.Column="1" Command="{Binding SearchNewQueryCommand}" Content="BUSCAR" Width="120" Margin="10,0,0,0" 
                     Background="#007ACC" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
-            <Button Grid.Column="2" Command="{Binding OpenSettingsCommand}" Content="AJUSTES" Width="100" Margin="10,0,0,0" 
+            <Button Grid.Row="0" Grid.Column="2" Command="{Binding OpenSettingsCommand}" Content="AJUSTES" Width="100" Margin="10,0,0,0" 
                     Background="#333333" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+            
+            <!-- Fila 1: Filtros de Búsqueda -->
+            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                <TextBlock Text="Categorías:" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="SemiBold"/>
+                <CheckBox Content="General" IsChecked="{Binding CategoriesGeneral}" Foreground="White" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                <CheckBox Content="Anime" IsChecked="{Binding CategoriesAnime}" Foreground="White" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                <CheckBox Content="People" IsChecked="{Binding CategoriesPeople}" Foreground="White" Margin="0,0,20,0" VerticalAlignment="Center"/>
+
+                <TextBlock Text="Pureza:" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="SemiBold"/>
+                <CheckBox Content="SFW" IsChecked="{Binding PuritySfw}" Foreground="White" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                <CheckBox Content="Sketchy" IsChecked="{Binding PuritySketchy}" Foreground="White" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                <CheckBox Content="NSFW" IsChecked="{Binding PurityNsfw}" Foreground="White" Margin="0,0,20,0" VerticalAlignment="Center"/>
+
+                <TextBlock Text="Ordenar:" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="SemiBold"/>
+                <ComboBox SelectedValue="{Binding SelectedSorting}" SelectedValuePath="Content" Height="25" Width="120" VerticalAlignment="Center" Margin="0,0,15,0">
+                    <ComboBoxItem Content="relevance" IsSelected="True"/>
+                    <ComboBoxItem Content="date_added"/>
+                    <ComboBoxItem Content="views"/>
+                    <ComboBoxItem Content="favorites"/>
+                    <ComboBoxItem Content="toplist"/>
+                    <ComboBoxItem Content="random"/>
+                </ComboBox>
+
+                <ComboBox SelectedValue="{Binding SelectedOrder}" SelectedValuePath="Content" Height="25" Width="80" VerticalAlignment="Center">
+                    <ComboBoxItem Content="desc" IsSelected="True"/>
+                    <ComboBoxItem Content="asc"/>
+                </ComboBox>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -78,7 +113,17 @@
             </StackPanel>
         </Grid>
 
-        <StatusBar Grid.Row="2" Background="#1E1E1E" Margin="0,15,0,0" Foreground="#AAAAAA">
+        <!-- Paginación -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Center">
+            <Button Command="{Binding GoToPreviousPageCommand}" Content="◀ Anterior" Width="100" Height="30" Background="#333333" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+            
+            <TextBlock Text="{Binding CurrentPage, StringFormat='Página {0}'}" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0" FontSize="14" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding MaxPages, StringFormat='de {0}'}" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,15,0" FontSize="14"/>
+
+            <Button Command="{Binding GoToNextPageCommand}" Content="Siguiente ▶" Width="100" Height="30" Background="#333333" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+        </StackPanel>
+
+        <StatusBar Grid.Row="3" Background="#1E1E1E" Margin="0,15,0,0" Foreground="#AAAAAA">
             <StatusBarItem>
                 <TextBlock Text="{Binding StatusMessage}"/>
             </StatusBarItem>

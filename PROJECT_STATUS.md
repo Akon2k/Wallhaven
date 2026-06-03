@@ -13,7 +13,7 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
 - [x] **Punto 2: Caché Local de Imágenes e Interfaz de Visualización con Zoom** | *AkonDeV 03/06/2026*
   - Diseño: Control de caché local e integración con visualizador.
   - UI: Visualización avanzada, soporte para zoom con rueda, ajuste automático y tamaño real.
-- [ ] **Punto 3: Búsqueda con Filtros Completos y Paginación**
+- [x] **Punto 3: Búsqueda con Filtros Completos y Paginación** | *AkonDeV 03/06/2026*
   - Diseño: Vinculación de query string avanzada y límites de API.
   - UI: Panel de filtros (Categorías, Purity, Ordenación) y barra de paginación.
 - [ ] **Punto 4: Redimensionador Móvil Avanzado**

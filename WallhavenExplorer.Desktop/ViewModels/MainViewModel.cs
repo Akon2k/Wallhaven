@@ -29,8 +29,21 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private ObservableCollection<Wallpaper> _wallpapers = new();
         [ObservableProperty] private Wallpaper? _selectedWallpaper;
         [ObservableProperty] private string _displayedImagePath = string.Empty;
+        
+        // Paginación
         [ObservableProperty] private int _currentPage = 1;
         [ObservableProperty] private int _maxPages = 1;
+        
+        // Filtros observables
+        [ObservableProperty] private bool _categoriesGeneral = true;
+        [ObservableProperty] private bool _categoriesAnime = true;
+        [ObservableProperty] private bool _categoriesPeople = true;
+        [ObservableProperty] private bool _puritySfw = true;
+        [ObservableProperty] private bool _puritySketchy = false;
+        [ObservableProperty] private bool _purityNsfw = false;
+        [ObservableProperty] private string _selectedSorting = "relevance";
+        [ObservableProperty] private string _selectedOrder = "desc";
+
         [ObservableProperty] private double _downloadProgress;
         [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private string _statusMessage = "Listo";
@@ -91,6 +104,14 @@ namespace WallhavenExplorer.Desktop.ViewModels
         }
 
         [RelayCommand]
+        public async Task SearchNewQueryAsync()
+        {
+            // // AkonDeV 06/2026
+            CurrentPage = 1;
+            await ExecuteSearchAsync();
+        }
+
+        [RelayCommand]
         public async Task ExecuteSearchAsync()
         {
             // // AkonDeV 06/2026
@@ -104,11 +125,17 @@ namespace WallhavenExplorer.Desktop.ViewModels
             try
             {
                 var config = await _configService.LoadConfigAsync();
+                
+                // Formatear categorías y pureza en cadenas binarias de 3 bits
+                string categories = $"{(CategoriesGeneral ? 1 : 0)}{(CategoriesAnime ? 1 : 0)}{(CategoriesPeople ? 1 : 0)}";
+                string purity = $"{(PuritySfw ? 1 : 0)}{(PuritySketchy ? 1 : 0)}{(PurityNsfw ? 1 : 0)}";
+
                 var filters = new SearchFilters 
                 { 
-                    Categories = "111", 
-                    Purity = "100", 
-                    Sorting = "relevance",
+                    Categories = categories, 
+                    Purity = purity, 
+                    Sorting = SelectedSorting,
+                    Order = SelectedOrder,
                     ApiKey = config.ApiKey 
                 };
                 
@@ -145,6 +172,28 @@ namespace WallhavenExplorer.Desktop.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task GoToNextPageAsync()
+        {
+            // // AkonDeV 06/2026
+            if (CurrentPage < MaxPages)
+            {
+                CurrentPage++;
+                await ExecuteSearchAsync();
+            }
+        }
+
+        [RelayCommand]
+        public async Task GoToPreviousPageAsync()
+        {
+            // // AkonDeV 06/2026
+            if (CurrentPage > 1)
+            {
+                CurrentPage--;
+                await ExecuteSearchAsync();
             }
         }
 
