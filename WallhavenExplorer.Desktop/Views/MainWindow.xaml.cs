@@ -60,5 +60,59 @@ namespace WallhavenExplorer.Desktop.Views
                 }
             }
         }
+
+        private WindowStyle _previousStyle = WindowStyle.SingleBorderWindow;
+        private WindowState _previousState = WindowState.Normal;
+        private ResizeMode _previousResizeMode = ResizeMode.CanResize;
+        private bool _previousTopmost = false;
+
+        private void ToggleFullScreen_Click(object sender, RoutedEventArgs e)
+        {
+            // // AkonDeV 06/2026
+            if (DataContext is MainViewModel vm)
+            {
+                vm.IsFullScreen = !vm.IsFullScreen;
+                ApplyFullScreenState(vm.IsFullScreen);
+            }
+        }
+
+        private void ApplyFullScreenState(bool isFullScreen)
+        {
+            // // AkonDeV 06/2026
+            if (isFullScreen)
+            {
+                _previousStyle = this.WindowStyle;
+                _previousState = this.WindowState;
+                _previousResizeMode = this.ResizeMode;
+                _previousTopmost = this.Topmost;
+
+                this.WindowStyle = WindowStyle.None;
+                this.WindowState = WindowState.Maximized;
+                this.ResizeMode = ResizeMode.NoResize;
+                this.Topmost = true;
+            }
+            else
+            {
+                this.WindowStyle = _previousStyle;
+                this.WindowState = _previousState;
+                this.ResizeMode = _previousResizeMode;
+                this.Topmost = _previousTopmost;
+            }
+        }
+
+        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        {
+            // // AkonDeV 06/2026
+            if (e.Key == Key.Escape)
+            {
+                if (DataContext is MainViewModel vm && vm.IsFullScreen)
+                {
+                    vm.IsFullScreen = false;
+                    ApplyFullScreenState(false);
+                    e.Handled = true;
+                }
+            }
+            base.OnPreviewKeyDown(e);
+        }
     }
 }

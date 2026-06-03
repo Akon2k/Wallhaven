@@ -22,6 +22,15 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFullScreen}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -81,10 +90,50 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
-                    <Button Content="Ajustar a ventana" Click="FitToWindow_Click" Margin="0,0,10,0" Padding="8,4" Background="#2A2A2A" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
-                    <Button Content="Tamaño real" Click="ActualSize_Click" Padding="8,4" Background="#2A2A2A" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
-                </StackPanel>
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFullScreen}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button Content="Ajustar a ventana" Click="FitToWindow_Click" Margin="0,0,10,0" Padding="8,4" Background="#2A2A2A" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                        <Button Content="Tamaño real" Click="ActualSize_Click" Padding="8,4" Background="#2A2A2A" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Command="{Binding CopyUrlToClipboardCommand}" Content="📋 Copiar URL" Margin="0,0,10,0" Padding="8,4" Background="#2D2D2D" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                        <Button Command="{Binding OpenInBrowserCommand}" Content="🌐 Ver en Web" Margin="0,0,10,0" Padding="8,4" Background="#2D2D2D" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                        <Button Command="{Binding GetRandomWallpaperCommand}" Content="🎲 Aleatorio" Margin="0,0,10,0" Padding="8,4" Background="#6F42C1" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                        
+                        <Button Command="{Binding ToggleSlideshowCommand}" Margin="0,0,10,0" Padding="8,4" Foreground="White" BorderThickness="0" FontWeight="SemiBold">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#28A745"/>
+                                    <Setter Property="Content" Value="▶ Slideshow"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSlideshowActive}" Value="True">
+                                            <Setter Property="Background" Value="#DC3545"/>
+                                            <Setter Property="Content" Value="⏸ Detener"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        
+                        <Button Click="ToggleFullScreen_Click" Content="🖥️ Pantalla Completa" Padding="8,4" Background="#007ACC" Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
 
                 <Border Grid.Row="1" Background="#1A1A1A" CornerRadius="4" BorderBrush="#2D2D2D" BorderThickness="1">
                     <Grid>
@@ -103,6 +152,15 @@
             </Grid>
 
             <TabControl Grid.Column="1" Margin="15,0,0,0" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1">
+                <TabControl.Style>
+                    <Style TargetType="TabControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsFullScreen}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabControl.Style>
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="HeaderTemplate">
@@ -227,6 +285,15 @@
 
         <!-- Paginación -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Center">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFullScreen}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
             <Button Command="{Binding GoToPreviousPageCommand}" Content="◀ Anterior" Width="100" Height="30" Background="#333333" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
             
             <TextBlock Text="{Binding CurrentPage, StringFormat='Página {0}'}" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0" FontSize="14" FontWeight="SemiBold"/>
@@ -236,6 +303,15 @@
         </StackPanel>
 
         <StatusBar Grid.Row="3" Background="#1E1E1E" Margin="0,15,0,0" Foreground="#AAAAAA">
+            <StatusBar.Style>
+                <Style TargetType="StatusBar">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFullScreen}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StatusBar.Style>
             <StatusBarItem>
                 <TextBlock Text="{Binding StatusMessage}"/>
             </StatusBarItem>

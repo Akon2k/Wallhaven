@@ -22,5 +22,5 @@ Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo c
 - [x] **Punto 5: Gestión de Favoritos e Historial Local** | *AkonDeV 03/06/2026*
   - Diseño: SQLite CRUD completo e historial de búsquedas recientes.
   - UI: Vista lateral de favoritos y buscador histórico.
-- [ ] **Punto 6: Características Extra (Slideshow, Pantalla Completa, Portapapeles, Navegador)**
+- [x] **Punto 6: Características Extra (Slideshow, Pantalla Completa, Portapapeles, Navegador)** | *AkonDeV 03/06/2026*
   - Diseño: Temporizadores de slideshow y llamadas a procesos del sistema.

@@ -23,6 +23,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
         private readonly IImageCacheService _imageCacheService;
         private readonly IServiceProvider _serviceProvider;
         private CancellationTokenSource? _searchCts;
+        private CancellationTokenSource? _slideshowCts;
 
         [ObservableProperty] private string _title = "Wallhaven Explorer";
         [ObservableProperty] private string _searchQuery = string.Empty;
@@ -32,6 +33,8 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private ObservableCollection<Wallpaper> _favoriteWallpapers = new();
         [ObservableProperty] private ObservableCollection<string> _searchHistory = new();
         [ObservableProperty] private bool _isFavorite;
+        [ObservableProperty] private bool _isSlideshowActive;
+        [ObservableProperty] private bool _isFullScreen;
         
         // Paginación
         [ObservableProperty] private int _currentPage = 1;
@@ -423,6 +426,116 @@ namespace WallhavenExplorer.Desktop.ViewModels
             SearchQuery = query;
             CurrentPage = 1;
             await ExecuteSearchAsync();
+        }
+
+        [RelayCommand]
+        public async Task ToggleSlideshowAsync()
+        {
+            // // AkonDeV 06/2026
+            if (IsSlideshowActive)
+            {
+                IsSlideshowActive = false;
+                _slideshowCts?.Cancel();
+                StatusMessage = "Slideshow pausado.";
+            }
+            else
+            {
+                IsSlideshowActive = true;
+                _slideshowCts = new CancellationTokenSource();
+                StatusMessage = "Slideshow iniciado.";
+                _ = RunSlideshowLoopAsync(_slideshowCts.Token);
+            }
+        }
+
+        private async Task RunSlideshowLoopAsync(CancellationToken token)
+        {
+            // // AkonDeV 06/2026
+            try
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), token);
+
+                    if (Wallpapers.Count == 0 || SelectedWallpaper == null) continue;
+
+                    int currentIndex = Wallpapers.IndexOf(SelectedWallpaper);
+                    if (currentIndex < Wallpapers.Count - 1)
+                    {
+                        SelectedWallpaper = Wallpapers[currentIndex + 1];
+                    }
+                    else
+                    {
+                        if (CurrentPage < MaxPages)
+                        {
+                            CurrentPage++;
+                            await ExecuteSearchAsync();
+                        }
+                        else
+                        {
+                            SelectedWallpaper = Wallpapers[0];
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en el bucle del Slideshow.");
+            }
+            finally
+            {
+                IsSlideshowActive = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task GetRandomWallpaperAsync()
+        {
+            // // AkonDeV 06/2026
+            SelectedSorting = "random";
+            SearchQuery = string.Empty;
+            CurrentPage = 1;
+            await ExecuteSearchAsync();
+        }
+
+        [RelayCommand]
+        public void CopyUrlToClipboard()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null) return;
+            try
+            {
+                Clipboard.SetText(SelectedWallpaper.Url);
+                StatusMessage = "URL copiada al portapapeles.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al copiar URL al portapapeles.");
+                StatusMessage = "No se pudo copiar la URL.";
+            }
+        }
+
+        [RelayCommand]
+        public void OpenInBrowser()
+        {
+            // // AkonDeV 06/2026
+            if (SelectedWallpaper == null || string.IsNullOrWhiteSpace(SelectedWallpaper.Url)) return;
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = SelectedWallpaper.Url,
+                    UseShellExecute = true
+                });
+                StatusMessage = "Abriendo en el navegador...";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al abrir la URL {Url} en el navegador.", SelectedWallpaper.Url);
+                StatusMessage = "No se pudo abrir el navegador.";
+            }
         }
 
         [RelayCommand]
