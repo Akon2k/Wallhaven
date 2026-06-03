@@ -58,6 +58,17 @@ namespace WallhavenExplorer.Desktop.ViewModels
         [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private string _statusMessage = "Listo";
 
+        public string ImagePositionText
+        {
+            get
+            {
+                // // AkonDeV 06/2026
+                if (Wallpapers.Count == 0 || SelectedWallpaper == null) return "Sin imágenes";
+                int index = Wallpapers.IndexOf(SelectedWallpaper) + 1;
+                return $"Imagen {index} de {Wallpapers.Count}";
+            }
+        }
+
         public MainViewModel(
             IWallhavenService whService, 
             IImageProcessorService imgService, 
@@ -84,6 +95,7 @@ namespace WallhavenExplorer.Desktop.ViewModels
         {
             // // AkonDeV 06/2026
             _ = UpdateDisplayedImageAsync(value);
+            OnPropertyChanged(nameof(ImagePositionText));
         }
 
         private async Task UpdateDisplayedImageAsync(Wallpaper? wp)
@@ -234,6 +246,26 @@ namespace WallhavenExplorer.Desktop.ViewModels
             if (currentIndex > 0)
             {
                 SelectedWallpaper = Wallpapers[currentIndex - 1];
+            }
+        }
+
+        [RelayCommand]
+        public void NavigateFirst()
+        {
+            // // AkonDeV 06/2026
+            if (Wallpapers.Count > 0)
+            {
+                SelectedWallpaper = Wallpapers[0];
+            }
+        }
+
+        [RelayCommand]
+        public void NavigateLast()
+        {
+            // // AkonDeV 06/2026
+            if (Wallpapers.Count > 0)
+            {
+                SelectedWallpaper = Wallpapers[Wallpapers.Count - 1];
             }
         }
 
