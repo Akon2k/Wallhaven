@@ -131,6 +131,45 @@ void main() {
       final file = File('non_existent_config.json');
       if (await file.exists()) await file.delete();
     });
+
+    test('Actualizar configuración persiste los datos y actualiza el estado', () async {
+      // // AkonDeV 06/2026
+      final configService = ConfigurationService(customPath: 'test_config_update.json');
+      final notifier = MainNotifier(
+        whService: MockWallhavenService(),
+        imgService: MockImageProcessorService(),
+        dbService: DatabaseService(customPath: ':memory:'),
+        configService: configService,
+        imageCacheService: MockImageCacheService(),
+      );
+
+      // Esperar a que _init se ejecute asíncronamente
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      final newConfig = AppConfig(
+        apiKey: 'new_api_key_123',
+        downloadDirectory: 'C:/TestDownload',
+        mobileDirectory: 'C:/TestMobile',
+        defaultResizeSize: '1440x2560',
+        theme: 'Light',
+      );
+
+      await notifier.updateSettings(newConfig);
+
+      expect(notifier.state.appConfig.apiKey, equals('new_api_key_123'));
+      expect(notifier.state.appConfig.downloadDirectory, equals('C:/TestDownload'));
+      expect(notifier.state.appConfig.mobileDirectory, equals('C:/TestMobile'));
+      expect(notifier.state.appConfig.defaultResizeSize, equals('1440x2560'));
+      expect(notifier.state.appConfig.theme, equals('Light'));
+
+      // Verificar que se haya guardado en el archivo
+      final reloadedConfig = await configService.loadConfig();
+      expect(reloadedConfig.apiKey, equals('new_api_key_123'));
+
+      // Limpieza
+      final file = File('test_config_update.json');
+      if (await file.exists()) await file.delete();
+    });
   });
 
   group('Pruebas de Integración y ViewModel (MainNotifier)', () {

@@ -1,0 +1,51 @@
+DOCUMENTO MAESTRO: FRAMEWORK FDA-IA 2.0 (AkonDeV)
+
+1. ORIGEN Y FILOSOFÍA
+Definición: Es el marco rector de ingeniería del proyecto.
+
+Qué hace: Establece una visión determinista y auditable del desarrollo. Garantiza que la IA actúe como un Arquitecto Senior y Tech Lead, no como un simple generador de texto. Su objetivo es asegurar calidad, mantenibilidad a largo plazo y evitar alucinaciones mediante un control estricto del estado del proyecto.
+
+2. LOS PILARES TÉCNICOS (Metodología)
+Definición: El conjunto de estándares y buenas prácticas de ingeniería de software.
+
+Qué hace: Proporciona la base estructural del código:
+
+System Persona: Define a la IA como un Arquitecto Senior estricto y conciso.
+
+Fuente de Verdad (PROJECT_STATUS.md): Centraliza el historial, el backlog y el estado del proyecto para evitar pérdida de contexto.
+
+Juez Auditor: Capa de autoevaluación obligatoria que filtra la calidad antes de entregar cualquier resultado.
+
+Calidad de Código: Aplicación estricta de principios DRY (no repetir), KISS (mantenerlo simple) y SRP (Responsabilidad Única).
+
+Zero-Touch Testing: Desarrollo guiado por pruebas (TDD) y validación de casos borde obligatorios.
+
+Seguridad: Sanitización de inputs y manejo de excepciones con logs (try-catch).
+
+3. CAPA TRANSVERSAL UI/UX
+Definición: La inteligencia de diseño visual y usabilidad de la interfaz.
+
+Qué hace: Se mantiene latente durante el desarrollo de backend, pero se activa automáticamente cuando la tarea involucra vistas o frontend. Aplica heurísticas de usabilidad, colorimetría y reglas estéticas acordadas al inicio del proyecto, sin alterar el flujo de trabajo estándar.
+
+4. DEFINICIÓN DE "PUNTO" (Unidad Atómica)
+Definición: La unidad mínima de desarrollo funcional.
+
+Qué hace: Desglosa requerimientos complejos en entregables manejables. Un "Punto" incluye su propio diseño, desarrollo (TDD/SRP), auditoría y documentación. Garantiza que el código no avance si la tarea activa no está 100% finalizada.
+
+5. SISTEMA DE CONTINUIDAD (📍 Punto de Restauración)
+Definición: El mecanismo de seguridad contra la pérdida de memoria o límite de tokens de la IA.
+
+Qué hace: Es un bloque obligatorio en la parte superior del PROJECT_STATUS.md. Si la sesión se interrumpe, cualquier agente nuevo lee este bloque y sabe exactamente en qué fase, en qué tarea y en qué estado se quedó el desarrollo, retomando el trabajo instantáneamente.
+
+6. LAS 4 FASES DEL CICLO DE VIDA (Flujo Inalterable)
+Definición: El proceso secuencial y auditable de ejecución.
+
+Qué hace: Coordina la transición desde la idea hasta el código final:
+
+FASE 0 (Discovery y UI/UX): Evaluación del entorno, definición de objetivos, propuesta del Stack Tecnológico y del Sistema de Diseño.
+
+FASE 1 (Planificación): Creación del Backlog estructurado por fases y Tareas Atómicas dentro del PROJECT_STATUS.md.
+
+FASE 2 (Ejecución Atómica): Programación estricta de la única tarea activa dictada por el Punto de Restauración (aplicando TDD, SRP y la Capa UI/UX si corresponde).
+
+FASE 3 (QA y Cierre): Auditoría interna del código generado, entrega del resultado y generación del comando para actualizar el estado a la siguiente tarea.

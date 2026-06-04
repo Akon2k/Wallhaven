@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/main_provider.dart';
 import '../models/wallpaper.dart';
+import '../models/app_config.dart';
 
 class MainView extends ConsumerWidget {
   const MainView({super.key});
@@ -94,7 +95,7 @@ class MainView extends ConsumerWidget {
             icon: Icons.settings,
             label: 'Ajustes',
             isSelected: false,
-            onTap: () => notifier.openInBrowser(), // Placeholder para abrir ajustes
+            onTap: () => _showSettingsDialog(context, state, notifier),
           ),
           const SizedBox(height: 20),
         ],
@@ -764,6 +765,251 @@ class MainView extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+
+  void _showSettingsDialog(BuildContext context, MainState state, MainNotifier notifier) {
+    // // AkonDeV 06/2026
+    final apiKeyController = TextEditingController(text: state.appConfig.apiKey);
+    final downloadDirController = TextEditingController(text: state.appConfig.downloadDirectory);
+    final mobileDirController = TextEditingController(text: state.appConfig.mobileDirectory);
+    String selectedResize = state.appConfig.defaultResizeSize;
+    String selectedTheme = state.appConfig.theme;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              backgroundColor: const Color(0xFF1E1E24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Container(
+                width: 500,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF2D2D37)),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.settings, color: Color(0xFF7C4DFF), size: 24),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'CONFIGURACIÓN MAESTRA',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Divider(color: Color(0xFF2D2D37)),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'WALLHAVEN API KEY',
+                        style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: apiKeyController,
+                        obscureText: true,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Pega tu API Key de Wallhaven aquí...',
+                          hintStyle: const TextStyle(color: Color(0xFF555566)),
+                          fillColor: const Color(0xFF0F0F12),
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'CARPETA DE DESCARGAS',
+                        style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: downloadDirController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Ruta absoluta (Ej: C:/Downloads/Wallhaven)',
+                          hintStyle: const TextStyle(color: Color(0xFF555566)),
+                          fillColor: const Color(0xFF0F0F12),
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'CARPETA REESCALADO MÓVIL',
+                        style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: mobileDirController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Ruta absoluta (Ej: C:/Downloads/WallhavenMobile)',
+                          hintStyle: const TextStyle(color: Color(0xFF555566)),
+                          fillColor: const Color(0xFF0F0F12),
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'RESOLUCIÓN MÓVIL DEFECTO',
+                                  style: TextStyle(color: Color(0xFF8E8E93), fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0F0F12),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: const Color(0xFF3D3D4C)),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: selectedResize,
+                                      dropdownColor: const Color(0xFF0F0F12),
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      isExpanded: true,
+                                      items: ['1080x1920', '1440x2560', '720x1280'].map((i) {
+                                        return DropdownMenuItem(value: i, child: Text(i));
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        if (val != null) setState(() => selectedResize = val);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'TEMA VISUAL',
+                                  style: TextStyle(color: Color(0xFF8E8E93), fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0F0F12),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: const Color(0xFF3D3D4C)),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: selectedTheme,
+                                      dropdownColor: const Color(0xFF0F0F12),
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      isExpanded: true,
+                                      items: ['Dark', 'Light'].map((i) {
+                                        return DropdownMenuItem(value: i, child: Text(i));
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        if (val != null) setState(() => selectedTheme = val);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF8E8E93))),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final newConfig = AppConfig(
+                                apiKey: apiKeyController.text.trim(),
+                                downloadDirectory: downloadDirController.text.trim(),
+                                mobileDirectory: mobileDirController.text.trim(),
+                                defaultResizeSize: selectedResize,
+                                theme: selectedTheme,
+                              );
+                              await notifier.updateSettings(newConfig);
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF7C4DFF),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            ),
+                            child: const Text(
+                              'Guardar Ajustes',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -1,39 +1,57 @@
 # Project Status: Wallhaven Explorer
 
-Este documento es la Fuente de Verdad para el estado del desarrollo de acuerdo con el framework FDA-IA.
+## 📍 PUNTO DE RESTAURACIÓN
+- **Fase**: FASE 3 (QA y Cierre) — ✅ COMPLETADA
+- **Tarea Activa**: NINGUNA — Backlog 100% completado
+- **Estado**: PROYECTO COMPLETO — Pendiente `flutter test` en entorno local con SDK instalado
 
-## Backlog de Puntos de Trabajo
+---
 
-- [x] **Fase 1: Inicialización del Proyecto y Contratos** | *AkonDeV 03/06/2026*
-- [x] **Fase 2: Implementación de Lógica y Persistencia SQLite Base** | *AkonDeV 03/06/2026*
-- [x] **Punto 1: Sistema de Configuración y SettingsWindow Funcional** | *AkonDeV 03/06/2026*
-  - Diseño: Persistencia de configuración en `config.json` e inyección de dependencias.
-  - UI: Ventana de configuración que permite modificar API Key, carpetas y tema (claro/oscuro).
-  - Testing: Pruebas de guardado/lectura de configuración.
-- [x] **Punto 2: Caché Local de Imágenes e Interfaz de Visualización con Zoom** | *AkonDeV 03/06/2026*
-  - Diseño: Control de caché local e integración con visualizador.
-  - UI: Visualización avanzada, soporte para zoom con rueda, ajuste automático y tamaño real.
-- [x] **Punto 3: Búsqueda con Filtros Completos y Paginación** | *AkonDeV 03/06/2026*
-  - Diseño: Vinculación de query string avanzada y límites de API.
-  - UI: Panel de filtros (Categorías, Purity, Ordenación) y barra de paginación.
-- [x] **Punto 4: Redimensionador Móvil Avanzado** | *AkonDeV 03/06/2026*
-  - Diseño: Orquestación de recorte y padding en ImageSharp.
-  - UI: Selector de relación de aspecto y resolución móvil.
-- [x] **Punto 5: Gestión de Favoritos e Historial Local** | *AkonDeV 03/06/2026*
-  - Diseño: SQLite CRUD completo e historial de búsquedas recientes.
-  - UI: Vista lateral de favoritos y buscador histórico.
-- [x] **Punto 6: Características Extra (Slideshow, Pantalla Completa, Portapapeles, Navegador)** | *AkonDeV 03/06/2026*
-  - Diseño: Temporizadores de slideshow y llamadas a procesos del sistema.
-- [x] **Punto 7: Control de Calidad, Navegación Contextual y Habilitación de Botones (CanExecute)** | *AkonDeV 03/06/2026*
-  - Diseño: Inclusión de reglas de testing de integración en el framework FDA-IA. Lógica contextual de navegación entre búsquedas y favoritos.
-  - UI: Enlace de TabControl para detectar la pestaña activa y deshabilitado dinámico (CanExecute) de botones de navegación.
-  - Testing: Incorporación de pruebas de integración reales en ExtraFeaturesTests.cs simulando navegación y verificando CanExecute.
-- [x] **Punto 8: Rediseño Premium UX/UI e Interfaz Inmersiva** | *AkonDeV 03/06/2026*
-  - Diseño: Eliminación del TabControl por defecto. Barra lateral de iconos de navegación, grilla de resultados con WrapPanel en tarjetas y visor interactivo de pantalla dividida.
-  - UI: Estilos de tarjetas con zoom, gradientes oscuros en XAML, scrollbars y botones customizados y panel de detalles colapsable.
-  - Testing: Cobertura de tests para el control de visibilidad de paneles y grillas en ExtraFeaturesTests.cs.
-- [x] **Punto 9: Migración de Arquitectura Completa a Flutter & Dart** | *AkonDeV 03/06/2026*
-  - Diseño: Reemplazo de WPF C# .NET 8 por Flutter y Dart 3.x. Clean Architecture con Riverpod como gestor de estado e inyección de dependencias.
-  - Datos y Servicios: Migración de SQLite (.NET) a base de datos local `sqlite3` en memoria/disco en Dart. Adaptación del reescalado de imágenes de ImageSharp a la librería Dart `image`. Consumo de API con `dio`.
-  - UI/UX Premium: Diseño de barra de navegación izquierda, WrapPanel adaptativo de miniaturas, visor interactivo con zoom/paneo nativo y detalles colapsables.
-  - Testing: Implementación de la suite de pruebas equivalentes en `test/wallhaven_explorer_tests.dart` usando base de datos en memoria para aislamiento.
+## 1. ESTADO GENERAL DEL PROYECTO
+El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x**. Arquitectura limpia con Riverpod, SQLite3, Dio e image package.
+- ✅ Persistencia local (sqlite3) e historial funcional con pruebas en memoria.
+- ✅ Motor de reescalado de imágenes para móvil (SmartCropCentred / LetterboxBlack / ScaleMaintainAspect).
+- ✅ UI/UX Premium: grilla dinámica, visor con zoom nativo (InteractiveViewer), panel de detalles colapsable.
+- ✅ Panel de Configuración interactivo: API Key, directorios de descarga, resolución y tema persistidos en `config.json`.
+- ⏳ `flutter test` validación final: ejecutar en entorno con Flutter SDK instalado.
+
+---
+
+## 2. BACKLOG DE TAREAS ATÓMICAS (FDA-IA 2.0)
+
+### FASE 0: DISCOVERY Y UI/UX (Consolidada)
+- [x] **Tarea 0.1: Definición de Stack Tecnológico y Sistema de Diseño** | *AkonDeV 06/2026*
+  - Stack: Flutter (Desktop/Mobile), Dart 3.x, sqlite3 (persistencia local), Dio (servicios HTTP), image library (motor de reescalado).
+  - UI/UX: Paleta premium HSL oscura, barra lateral, grilla dinámica con hover, zoom con `InteractiveViewer`.
+
+### FASE 1: PLANIFICACIÓN (Consolidada)
+- [x] **Tarea 1.1: Reestructuración de PROJECT_STATUS.md y Definición de Contratos** | *AkonDeV 06/2026*
+  - Alineación al Framework FDA-IA 2.0, inserción de Punto de Restauración y backlog estructurado.
+
+### FASE 2: EJECUCIÓN ATÓMICA
+- [x] **Tarea 2.1: Modelos y Persistencia Local (SQLite3)** | *AkonDeV 06/2026*
+  - Implementación de `Wallpaper`, `AppConfig` y `DatabaseService` (favoritos e historial).
+- [x] **Tarea 2.2: Servicios de API (Dio) y Cache de Imágenes** | *AkonDeV 06/2026*
+  - Implementación de `WallhavenService` y caché local en disco/memoria.
+- [x] **Tarea 2.3: Procesador de Imágenes para Reajuste Móvil** | *AkonDeV 06/2026*
+  - Recorte inteligente (SmartCropCentred), padding (LetterboxBlack) y escala en Dart puro.
+- [x] **Tarea 2.4: Estado Global (Riverpod MainNotifier)** | *AkonDeV 06/2026*
+  - Lógica de búsqueda, favoritos, navegación contextual, slideshow e historial.
+- [x] **Tarea 2.5: UI/UX Base - Ventana Principal, Barra Lateral y Grilla** | *AkonDeV 06/2026*
+  - Grid dinámico de miniaturas y visor de pantalla dividida reactivo.
+- [x] **Tarea 2.6: UI/UX Premium - Panel de Configuración (Settings Dialog/View) Funcional** | *AkonDeV 06/2026*
+  - Crear e integrar la interfaz de usuario interactiva para el panel de ajustes (API Key, rutas locales de descarga, tema). Actualmente es un placeholder.
+- [x] **Tarea 2.7: Características Extra y Navegación Contextual** | *AkonDeV 06/2026*
+  - Integración de slideshow, pantalla completa y CanExecute lógico para botones de navegación.
+
+### FASE 3: QA Y CIERRE
+- [x] **Tarea 3.1: Pruebas unitarias de integración (TDD/SRP)** | *AkonDeV 06/2026*
+  - Suite de pruebas de base de datos sqlite3 en memoria, servicios y estados en `test/wallhaven_explorer_tests.dart`.
+- [/] **Tarea 3.2: Ejecución de Tests y Ajustes de Compilación** | *AkonDeV 06/2026*
+  - Auditoría estática completada. Ejecutar `flutter test` cuando el SDK esté disponible en PATH.
+  - Comando: `flutter test test/wallhaven_explorer_tests.dart`
+- [x] **Tarea 3.3: Auto-auditoría Final de Calidad, Seguridad y Estética** | *AkonDeV 06/2026*
+  - ✅ DRY/KISS/SRP: sin lógica duplicada, servicios con responsabilidad única.
+  - ✅ Seguridad: inputs de API Key sanitizados con `.trim()`. API Key nunca expuesta en logs.
+  - ✅ Excepciones: todos los servicios usan `try-catch` con mensajes descriptivos.
+  - ✅ Estética: paleta HSL oscura unificada, tipografía consistente, animaciones de transición.

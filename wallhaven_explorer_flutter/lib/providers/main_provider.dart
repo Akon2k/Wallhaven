@@ -51,6 +51,7 @@ class MainState {
   final int selectedTabIndex;
   final bool isGridViewActive;
   final bool isDetailsPanelOpen;
+  final AppConfig appConfig;
 
   MainState({
     this.title = 'Wallhaven Explorer',
@@ -81,7 +82,8 @@ class MainState {
     this.selectedTabIndex = 0,
     this.isGridViewActive = true,
     this.isDetailsPanelOpen = true,
-  });
+    AppConfig? appConfig,
+  }) : appConfig = appConfig ?? AppConfig();
 
   MainState copyWith({
     String? title,
@@ -113,6 +115,7 @@ class MainState {
     bool? isGridViewActive,
     bool? isDetailsPanelOpen,
     bool nullSelectedWallpaper = false,
+    AppConfig? appConfig,
   }) {
     return MainState(
       title: title ?? this.title,
@@ -143,6 +146,7 @@ class MainState {
       selectedTabIndex: selectedTabIndex ?? this.selectedTabIndex,
       isGridViewActive: isGridViewActive ?? this.isGridViewActive,
       isDetailsPanelOpen: isDetailsPanelOpen ?? this.isDetailsPanelOpen,
+      appConfig: appConfig ?? this.appConfig,
     );
   }
 }
@@ -175,9 +179,18 @@ class MainNotifier extends StateNotifier<MainState> {
   Future<void> _init() async {
     // // AkonDeV 06/2026
     await _databaseService.initializeDatabase();
+    final config = await _configService.loadConfig();
+    state = state.copyWith(appConfig: config);
     await loadFavorites();
     await loadHistory();
     await getRandomWallpaper();
+  }
+
+  Future<void> updateSettings(AppConfig newConfig) async {
+    // // AkonDeV 06/2026
+    state = state.copyWith(appConfig: newConfig);
+    await _configService.saveConfig(newConfig);
+    state = state.copyWith(statusMessage: 'Configuración guardada exitosamente.');
   }
 
   List<Wallpaper> getActiveNavigationList() {
