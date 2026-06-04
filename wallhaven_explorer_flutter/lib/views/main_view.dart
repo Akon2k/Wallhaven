@@ -1,6 +1,7 @@
 // // AkonDeV 06/2026
 
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/main_provider.dart';
@@ -987,24 +988,46 @@ class _MainViewState extends ConsumerState<MainView> {
                         style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
-                      TextField(
-                        controller: downloadDirController,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
-                        decoration: InputDecoration(
-                          hintText: 'Ruta absoluta (Ej: C:/Downloads/Wallhaven)',
-                          hintStyle: const TextStyle(color: Color(0xFF555566)),
-                          fillColor: const Color(0xFF0F0F12),
-                          filled: true,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: downloadDirController,
+                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                              decoration: InputDecoration(
+                                hintText: 'Ruta absoluta (Ej: C:/Downloads/Wallhaven)',
+                                hintStyle: const TextStyle(color: Color(0xFF555566)),
+                                fillColor: const Color(0xFF0F0F12),
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                                ),
+                              ),
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              final String? selectedDirectory = await FilePicker.getDirectoryPath();
+                              if (selectedDirectory != null) {
+                                downloadDirController.text = selectedDirectory;
+                              }
+                            },
+                            icon: const Icon(Icons.folder_open, size: 16, color: Colors.white),
+                            label: const Text('Examinar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2D2D37),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       const Text(
@@ -1012,24 +1035,46 @@ class _MainViewState extends ConsumerState<MainView> {
                         style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
-                      TextField(
-                        controller: mobileDirController,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
-                        decoration: InputDecoration(
-                          hintText: 'Ruta absoluta (Ej: C:/Downloads/WallhavenMobile)',
-                          hintStyle: const TextStyle(color: Color(0xFF555566)),
-                          fillColor: const Color(0xFF0F0F12),
-                          filled: true,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: mobileDirController,
+                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                              decoration: InputDecoration(
+                                hintText: 'Ruta absoluta (Ej: C:/Downloads/WallhavenMobile)',
+                                hintStyle: const TextStyle(color: Color(0xFF555566)),
+                                fillColor: const Color(0xFF0F0F12),
+                                filled: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                                ),
+                              ),
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              final String? selectedDirectory = await FilePicker.getDirectoryPath();
+                              if (selectedDirectory != null) {
+                                mobileDirController.text = selectedDirectory;
+                              }
+                            },
+                            icon: const Icon(Icons.folder_open, size: 16, color: Colors.white),
+                            label: const Text('Examinar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2D2D37),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       Row(

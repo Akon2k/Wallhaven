@@ -2,8 +2,8 @@
 
 ## 📍 PUNTO DE RESTAURACIÓN
 - **Fase**: FASE 3 (QA y Cierre) — ✅ COMPLETADA AL 100%
-- **Tarea Activa**: POST-CIERRE — Verificación final completa
-- **Estado**: ✅ 7/7 tests OK | Linter 0 warnings | Redimensionador interactivo funcionando y compilando
+- **Tarea Activa**: POST-CIERRE — Verificación final completa con selector de carpetas
+- **Estado**: ✅ 7/7 tests OK | Linter 0 warnings | Botones Examinar integrados y funcionales
 - **Próxima acción**: Listo para producción
 - **Flutter SDK**: `D:\flutter\bin` (ya en PATH de usuario)
 
@@ -47,10 +47,14 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
   - Integración de slideshow, pantalla completa y CanExecute lógico para botones de navegación.
 - [x] **Tarea 2.8: Redimensionador Móvil Interactivo (Recorte Manual)** | *AkonDeV 06/2026*
   - Implementar método `processCustomCrop` en `ImageProcessorService`.
-  - Integrar `isCropModeActive` en `MainState` y soportar `ManualCrop` en `MainNotifier`.
+  - Integrar `isCropModeActive` in `MainState` y soportar `ManualCrop` en `MainNotifier`.
   - Convertir `MainView` a `ConsumerStatefulWidget` y añadir `TransformationController` para leer la matriz de zoom/pan.
   - Implementar el pintor `CropOverlayPainter` con notch, guías 3x3 y marco de relación de aspecto.
   - Calcular coordenadas físicas reales y enviarlas al servicio de procesamiento.
+- [x] **Tarea 2.9: Botón Examinar en Panel de Ajustes (File Picker)** | *AkonDeV 06/2026*
+  - Agregar dependencia `file_picker` en `pubspec.yaml`.
+  - Rediseñar campos de texto de rutas en el diálogo de ajustes usando un `Row` con un botón "Examinar".
+  - Integrar llamada a `FilePicker.platform.getDirectoryPath()` para abrir el diálogo nativo de selección de directorios y actualizar los controladores.
 
 ### FASE 3: QA Y CIERRE
 - [x] **Tarea 3.1: Pruebas unitarias de integración (TDD/SRP)** | *AkonDeV 06/2026*
