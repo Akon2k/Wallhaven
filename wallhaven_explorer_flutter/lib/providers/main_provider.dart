@@ -43,6 +43,7 @@ class MainState {
 
   final String selectedResizeResolution;
   final String selectedResizeMode;
+  final bool isCropModeActive;
 
   final double downloadProgress;
   final bool isLoading;
@@ -76,6 +77,7 @@ class MainState {
     this.selectedOrder = 'desc',
     this.selectedResizeResolution = '1080x1920',
     this.selectedResizeMode = 'SmartCropCentred',
+    this.isCropModeActive = false,
     this.downloadProgress = 0.0,
     this.isLoading = false,
     this.statusMessage = 'Listo',
@@ -108,6 +110,7 @@ class MainState {
     String? selectedOrder,
     String? selectedResizeResolution,
     String? selectedResizeMode,
+    bool? isCropModeActive,
     double? downloadProgress,
     bool? isLoading,
     String? statusMessage,
@@ -140,6 +143,7 @@ class MainState {
       selectedOrder: selectedOrder ?? this.selectedOrder,
       selectedResizeResolution: selectedResizeResolution ?? this.selectedResizeResolution,
       selectedResizeMode: selectedResizeMode ?? this.selectedResizeMode,
+      isCropModeActive: isCropModeActive ?? this.isCropModeActive,
       downloadProgress: downloadProgress ?? this.downloadProgress,
       isLoading: isLoading ?? this.isLoading,
       statusMessage: statusMessage ?? this.statusMessage,
@@ -420,7 +424,12 @@ class MainNotifier extends Notifier<MainState> {
     }
   }
 
-  Future<void> createMobileVersion() async {
+  Future<void> createMobileVersion({
+    int? cropX,
+    int? cropY,
+    int? cropWidth,
+    int? cropHeight,
+  }) async {
     // // AkonDeV 06/2026
     final wp = state.selectedWallpaper;
     if (wp == null) return;
@@ -445,13 +454,6 @@ class MainNotifier extends Notifier<MainState> {
         height = int.tryParse(parts[1]) ?? 1920;
       }
 
-      ResizeMode mode = ResizeMode.SmartCropCentred;
-      if (state.selectedResizeMode == 'LetterboxBlack') {
-        mode = ResizeMode.LetterboxBlack;
-      } else if (state.selectedResizeMode == 'ScaleMaintainAspect') {
-        mode = ResizeMode.ScaleMaintainAspect;
-      }
-
       String targetFolder = config.mobileDirectory;
       if (targetFolder.isEmpty) {
         final picDir = await getTemporaryDirectory();
@@ -459,21 +461,47 @@ class MainNotifier extends Notifier<MainState> {
       }
 
       final ext = p.extension(wp.path).isEmpty ? '.jpg' : p.extension(wp.path);
-      final targetPath = p.join(targetFolder, '${wp.id}_${width}x${height}_${mode.name}$ext');
 
-      state = state.copyWith(statusMessage: 'Procesando y redimensionando imagen...');
-      await _imageProcessorService.processMobileResize(
-        sourcePath: sourcePath,
-        targetPath: targetPath,
-        targetWidth: width,
-        targetHeight: height,
-        mode: mode,
-      );
-
-      state = state.copyWith(
-        statusMessage: 'Versión móvil guardada con éxito en: $targetPath',
-        isLoading: false,
-      );
+      if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
+        // Modo de recorte manual
+        final targetPath = p.join(targetFolder, '${wp.id}_${width}x${height}_manual$ext');
+        state = state.copyWith(statusMessage: 'Recortando y redimensionando imagen manualmente...');
+        await _imageProcessorService.processCustomCrop(
+          sourcePath: sourcePath,
+          targetPath: targetPath,
+          targetWidth: width,
+          targetHeight: height,
+          cropX: cropX,
+          cropY: cropY,
+          cropWidth: cropWidth,
+          cropHeight: cropHeight,
+        );
+        state = state.copyWith(
+          statusMessage: 'Versión móvil recortada guardada en: $targetPath',
+          isLoading: false,
+        );
+      } else {
+        // Modo de redimensionamiento automático
+        ResizeMode mode = ResizeMode.smartCropCentred;
+        if (state.selectedResizeMode == 'LetterboxBlack') {
+          mode = ResizeMode.letterboxBlack;
+        } else if (state.selectedResizeMode == 'ScaleMaintainAspect') {
+          mode = ResizeMode.scaleMaintainAspect;
+        }
+        final targetPath = p.join(targetFolder, '${wp.id}_${width}x${height}_${mode.name}$ext');
+        state = state.copyWith(statusMessage: 'Procesando y redimensionando imagen...');
+        await _imageProcessorService.processMobileResize(
+          sourcePath: sourcePath,
+          targetPath: targetPath,
+          targetWidth: width,
+          targetHeight: height,
+          mode: mode,
+        );
+        state = state.copyWith(
+          statusMessage: 'Versión móvil guardada con éxito en: $targetPath',
+          isLoading: false,
+        );
+      }
     } catch (e) {
       state = state.copyWith(statusMessage: 'Fallo al procesar la imagen móvil.', isLoading: false);
     }
@@ -636,7 +664,10 @@ class MainNotifier extends Notifier<MainState> {
 
   void updateResizeMode(String val) {
     // // AkonDeV 06/2026
-    state = state.copyWith(selectedResizeMode: val);
+    state = state.copyWith(
+      selectedResizeMode: val,
+      isCropModeActive: val == 'ManualCrop',
+    );
   }
 
   void setFullScreen(bool val) {

@@ -2,9 +2,9 @@
 
 ## 📍 PUNTO DE RESTAURACIÓN
 - **Fase**: FASE 3 (QA y Cierre) — ✅ COMPLETADA AL 100%
-- **Tarea Activa**: POST-CIERRE — Verificación de compilación Windows
-- **Estado**: ✅ 7/7 tests OK (commit `88c02c0`) | Visual Studio instalado | Reinicio pendiente
-- **Próxima acción**: `flutter run -d windows` desde `d:\Proyectos Antigravity\WallHeaven\wallhaven_explorer_flutter`
+- **Tarea Activa**: POST-CIERRE — Verificación final completa
+- **Estado**: ✅ 7/7 tests OK | Linter 0 warnings | Redimensionador interactivo funcionando y compilando
+- **Próxima acción**: Listo para producción
 - **Flutter SDK**: `D:\flutter\bin` (ya en PATH de usuario)
 
 ---
@@ -45,10 +45,16 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
   - Crear e integrar la interfaz de usuario interactiva para el panel de ajustes (API Key, rutas locales de descarga, tema). Actualmente es un placeholder.
 - [x] **Tarea 2.7: Características Extra y Navegación Contextual** | *AkonDeV 06/2026*
   - Integración de slideshow, pantalla completa y CanExecute lógico para botones de navegación.
+- [x] **Tarea 2.8: Redimensionador Móvil Interactivo (Recorte Manual)** | *AkonDeV 06/2026*
+  - Implementar método `processCustomCrop` en `ImageProcessorService`.
+  - Integrar `isCropModeActive` en `MainState` y soportar `ManualCrop` en `MainNotifier`.
+  - Convertir `MainView` a `ConsumerStatefulWidget` y añadir `TransformationController` para leer la matriz de zoom/pan.
+  - Implementar el pintor `CropOverlayPainter` con notch, guías 3x3 y marco de relación de aspecto.
+  - Calcular coordenadas físicas reales y enviarlas al servicio de procesamiento.
 
 ### FASE 3: QA Y CIERRE
 - [x] **Tarea 3.1: Pruebas unitarias de integración (TDD/SRP)** | *AkonDeV 06/2026*
-  - Suite de pruebas de base de datos sqlite3 en memoria, servicios y estados en `test/wallhaven_explorer_tests.dart`.
+  - Suite de pruebas de base de datos sqlite3 en memoria, servicios y estados en `test/wallhaven_explorer_test.dart` (mock de procesamiento de imágenes actualizado con éxito).
 - [x] **Tarea 3.2: Ejecución de Tests y Ajustes de Compilación** | *AkonDeV 06/2026*
   - ✅ `flutter test` ejecutado: **7/7 tests pasan**.
   - Migrado a Riverpod 3.x (`Notifier` / `NotifierProvider`). Guards `ref.mounted` en todos los métodos async.

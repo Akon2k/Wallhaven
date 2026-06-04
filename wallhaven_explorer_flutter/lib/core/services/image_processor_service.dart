@@ -5,9 +5,9 @@ import 'dart:math';
 import 'package:image/image.dart' as img;
 
 enum ResizeMode {
-  SmartCropCentred,
-  LetterboxBlack,
-  ScaleMaintainAspect,
+  smartCropCentred,
+  letterboxBlack,
+  scaleMaintainAspect,
 }
 
 class ImageProcessorService {
@@ -36,7 +36,7 @@ class ImageProcessorService {
     img.Image resultImage;
 
     switch (mode) {
-      case ResizeMode.SmartCropCentred:
+      case ResizeMode.smartCropCentred:
         final double srcRatio = srcWidth / srcHeight;
         final double targetRatio = targetWidth / targetHeight;
 
@@ -73,7 +73,7 @@ class ImageProcessorService {
         );
         break;
 
-      case ResizeMode.LetterboxBlack:
+      case ResizeMode.letterboxBlack:
         // Crear lienzo negro
         final canvas = img.Image(width: targetWidth, height: targetHeight);
         canvas.clear(img.ColorRgb8(0, 0, 0)); // Rellenar de negro
@@ -104,7 +104,7 @@ class ImageProcessorService {
         resultImage = canvas;
         break;
 
-      case ResizeMode.ScaleMaintainAspect:
+      case ResizeMode.scaleMaintainAspect:
         final double scale = min(targetWidth / srcWidth, targetHeight / srcHeight);
         final int newWidth = (srcWidth * scale).round();
         final int newHeight = (srcHeight * scale).round();
@@ -117,6 +117,61 @@ class ImageProcessorService {
         );
         break;
     }
+
+    // Guardar imagen resultante
+    final targetFile = File(targetPath);
+    if (!await targetFile.parent.exists()) {
+      await targetFile.parent.create(recursive: true);
+    }
+
+    final String ext = pPathExtension(targetPath).toLowerCase();
+    List<int> encodedBytes;
+    if (ext == '.png') {
+      encodedBytes = img.encodePng(resultImage);
+    } else {
+      encodedBytes = img.encodeJpg(resultImage, quality: 90);
+    }
+
+    await targetFile.writeAsBytes(encodedBytes);
+  }
+
+  Future<void> processCustomCrop({
+    required String sourcePath,
+    required String targetPath,
+    required int targetWidth,
+    required int targetHeight,
+    required int cropX,
+    required int cropY,
+    required int cropWidth,
+    required int cropHeight,
+  }) async {
+    final sourceFile = File(sourcePath);
+    if (!await sourceFile.exists()) {
+      throw FileSystemException('Archivo de origen no encontrado', sourcePath);
+    }
+
+    final bytes = await sourceFile.readAsBytes();
+    final sourceImage = img.decodeImage(bytes);
+    if (sourceImage == null) {
+      throw const FormatException('Fallo al decodificar la imagen de origen.');
+    }
+
+    // 1. Recortar
+    final cropped = img.copyCrop(
+      sourceImage,
+      x: cropX,
+      y: cropY,
+      width: cropWidth,
+      height: cropHeight,
+    );
+
+    // 2. Redimensionar
+    final resultImage = img.copyResize(
+      cropped,
+      width: targetWidth,
+      height: targetHeight,
+      interpolation: img.Interpolation.cubic,
+    );
 
     // Guardar imagen resultante
     final targetFile = File(targetPath);

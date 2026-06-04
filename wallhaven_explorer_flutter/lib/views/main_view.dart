@@ -7,14 +7,44 @@ import '../providers/main_provider.dart';
 import '../models/wallpaper.dart';
 import '../models/app_config.dart';
 
-class MainView extends ConsumerWidget {
+class MainView extends ConsumerStatefulWidget {
   const MainView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainView> createState() => _MainViewState();
+}
+
+class _MainViewState extends ConsumerState<MainView> {
+  late TransformationController _transformationController;
+  final GlobalKey _viewerKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _transformationController = TransformationController();
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // // AkonDeV 06/2026
     final state = ref.watch(mainProvider);
     final notifier = ref.read(mainProvider.notifier);
+
+    // Escuchar cambios del wallpaper para reiniciar la vista de transformación
+    ref.listen<Wallpaper?>(
+      mainProvider.select((s) => s.selectedWallpaper),
+      (previous, next) {
+        if (previous?.id != next?.id) {
+          _transformationController.value = Matrix4.identity();
+        }
+      },
+    );
 
     // Ajustar visibilidad general según modo pantalla completa
     final bool showPanels = !state.isFullScreen;
@@ -67,8 +97,10 @@ class MainView extends ConsumerWidget {
     // // AkonDeV 06/2026
     return Container(
       width: 70,
-      color: const Color(0xFF15151A),
-      border: const Border(right: BorderSide(color: Color(0xFF25252D), width: 1)),
+      decoration: const BoxDecoration(
+        color: Color(0xFF15151A),
+        border: Border(right: BorderSide(color: Color(0xFF25252D), width: 1)),
+      ),
       child: Column(
         children: [
           const SizedBox(height: 20),
@@ -434,27 +466,129 @@ class MainView extends ConsumerWidget {
             ),
           ),
 
-          // Pantalla del Visor Principal (InteractiveViewer para Zoom/Pan nativo)
+          // Pantalla del Visor Principal (InteractiveViewer para Zoom/Pan nativo y Recorte Manual)
           Expanded(
-            child: Container(
-              color: const Color(0xFF121214),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (state.displayedImagePath.isNotEmpty)
-                    InteractiveViewer(
-                      minScale: 0.1,
-                      maxScale: 10.0,
-                      child: state.displayedImagePath.startsWith('http')
-                          ? Image.network(state.displayedImagePath)
-                          : Image.file(File(state.displayedImagePath)),
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double wContainer = constraints.maxWidth;
+                final double hContainer = constraints.maxHeight;
 
-                  // Skeleton Loading
-                  if (state.isLoading)
-                    const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Color(0xFF7C4DFF)))),
-                ],
-              ),
+                // Calcular el tamaño inicial de la imagen (BoxFit.contain)
+                final parts = state.selectedWallpaper?.resolution.split('x') ?? ['1920', '1080'];
+                final double originalWidth = double.tryParse(parts[0]) ?? 1920.0;
+                final double originalHeight = double.tryParse(parts[1]) ?? 1080.0;
+
+                final double imageRatio = originalWidth / originalHeight;
+                final double containerRatio = wContainer / hContainer;
+
+                double wRender;
+                double hRender;
+                if (imageRatio > containerRatio) {
+                  wRender = wContainer;
+                  hRender = wContainer / imageRatio;
+                } else {
+                  hRender = hContainer;
+                  wRender = hContainer * imageRatio;
+                }
+
+                // Relación de aspecto del visor del móvil
+                final resParts = state.selectedResizeResolution.split('x');
+                double targetWidth = 1080.0;
+                double targetHeight = 1920.0;
+                if (resParts.length == 2) {
+                  targetWidth = double.tryParse(resParts[0]) ?? 1080.0;
+                  targetHeight = double.tryParse(resParts[1]) ?? 1920.0;
+                }
+                final double targetRatio = targetWidth / targetHeight;
+
+                // Calcular tamaño de la guía móvil
+                double hFrame = hContainer * 0.85;
+                double wFrame = hFrame * targetRatio;
+                if (wFrame > wContainer * 0.85) {
+                  wFrame = wContainer * 0.85;
+                  hFrame = wFrame / targetRatio;
+                }
+                final Size frameSize = Size(wFrame, hFrame);
+
+                return Container(
+                  key: _viewerKey,
+                  color: const Color(0xFF121214),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (state.displayedImagePath.isNotEmpty)
+                        InteractiveViewer(
+                          transformationController: _transformationController,
+                          minScale: 0.1,
+                          maxScale: 10.0,
+                          child: SizedBox(
+                            width: wContainer,
+                            height: hContainer,
+                            child: Center(
+                              child: SizedBox(
+                                width: wRender,
+                                height: hRender,
+                                child: state.displayedImagePath.startsWith('http')
+                                    ? Image.network(state.displayedImagePath, fit: BoxFit.fill)
+                                    : Image.file(File(state.displayedImagePath), fit: BoxFit.fill),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Overlay de guía móvil con notch y regla de tercios
+                      if (state.isCropModeActive && state.displayedImagePath.isNotEmpty)
+                        IgnorePointer(
+                          child: CustomPaint(
+                            size: Size(wContainer, hContainer),
+                            painter: CropOverlayPainter(frameSize),
+                          ),
+                        ),
+
+                      // Banner informativo premium
+                      if (state.isCropModeActive && state.displayedImagePath.isNotEmpty)
+                        Positioned(
+                          top: 15,
+                          left: 15,
+                          right: 15,
+                          child: IgnorePointer(
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF7C4DFF).withValues(alpha: 0.9),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.crop, color: Colors.white, size: 16),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Recorte Manual: Ubica la imagen dentro de la guía móvil',
+                                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Skeleton Loading
+                      if (state.isLoading)
+                        const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Color(0xFF7C4DFF)))),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
 
@@ -585,8 +719,10 @@ class MainView extends ConsumerWidget {
 
     return Container(
       width: 320,
-      color: const Color(0xFF1E1E24),
-      border: const Border(left: BorderSide(color: Color(0xFF2D2D37), width: 1)),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1E1E24),
+        border: Border(left: BorderSide(color: Color(0xFF2D2D37), width: 1)),
+      ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(15),
         child: Column(
@@ -696,12 +832,12 @@ class MainView extends ConsumerWidget {
                     const SizedBox(height: 4),
                     _buildDropdown(
                       value: state.selectedResizeMode,
-                      items: ['SmartCropCentred', 'LetterboxBlack', 'ScaleMaintainAspect'],
+                      items: ['SmartCropCentred', 'LetterboxBlack', 'ScaleMaintainAspect', 'ManualCrop'],
                       onChanged: (val) => notifier.updateResizeMode(val!),
                     ),
                     const SizedBox(height: 15),
                     ElevatedButton(
-                      onPressed: () => notifier.createMobileVersion(),
+                      onPressed: () => _handleCreateMobileVersion(state, notifier),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17A2B8),
                         minimumSize: const Size(double.infinity, 36),
@@ -778,7 +914,7 @@ class MainView extends ConsumerWidget {
 
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
+      barrierColor: Colors.black.withValues(alpha: 0.7),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -988,7 +1124,7 @@ class MainView extends ConsumerWidget {
                                 theme: selectedTheme,
                               );
                               await notifier.updateSettings(newConfig);
-                              Navigator.of(context).pop();
+                              if (context.mounted) Navigator.of(context).pop();
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C4DFF),
@@ -1012,4 +1148,182 @@ class MainView extends ConsumerWidget {
       },
     );
   }
+
+  void _handleCreateMobileVersion(MainState state, MainNotifier notifier) {
+    final wp = state.selectedWallpaper;
+    if (wp == null) return;
+
+    if (!state.isCropModeActive) {
+      notifier.createMobileVersion();
+      return;
+    }
+
+    final renderBox = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) {
+      notifier.createMobileVersion();
+      return;
+    }
+
+    final double wContainer = renderBox.size.width;
+    final double hContainer = renderBox.size.height;
+
+    // 1. Obtener la resolución original de la imagen
+    final parts = wp.resolution.split('x');
+    if (parts.length != 2) {
+      notifier.createMobileVersion();
+      return;
+    }
+    final double originalWidth = double.tryParse(parts[0]) ?? 1920.0;
+    final double originalHeight = double.tryParse(parts[1]) ?? 1080.0;
+
+    // 2. Obtener la resolución de reescalado objetivo (ej. '1080x1920')
+    final resParts = state.selectedResizeResolution.split('x');
+    double targetWidth = 1080.0;
+    double targetHeight = 1920.0;
+    if (resParts.length == 2) {
+      targetWidth = double.tryParse(resParts[0]) ?? 1080.0;
+      targetHeight = double.tryParse(resParts[1]) ?? 1920.0;
+    }
+
+    // Aspect ratio del visor móvil
+    final double targetRatio = targetWidth / targetHeight;
+
+    // 3. Calcular tamaño del marco de recorte en la pantalla (viewport lógico)
+    double hFrame = hContainer * 0.85;
+    double wFrame = hFrame * targetRatio;
+
+    if (wFrame > wContainer * 0.85) {
+      wFrame = wContainer * 0.85;
+      hFrame = wFrame / targetRatio;
+    }
+
+    // 4. Calcular el tamaño de la imagen renderizada al inicio (BoxFit.contain)
+    final double imageRatio = originalWidth / originalHeight;
+    final double containerRatio = wContainer / hContainer;
+
+    double wRender;
+    double hRender;
+    if (imageRatio > containerRatio) {
+      wRender = wContainer;
+      hRender = wContainer / imageRatio;
+    } else {
+      hRender = hContainer;
+      wRender = hContainer * imageRatio;
+    }
+
+    // Offset de la imagen inicial dentro del contenedor
+    final double xImgOffset = (wContainer - wRender) / 2;
+    final double yImgOffset = (hContainer - hRender) / 2;
+
+    // Posición del marco de recorte en coordenadas locales del contenedor
+    final double xTl = (wContainer - wFrame) / 2;
+    final double yTl = (hContainer - hFrame) / 2;
+
+    // 5. Extraer escala y traducciones de la matriz de transformación (storage column-major)
+    final Matrix4 matrix = _transformationController.value;
+    final double sVal = matrix.storage[0];  // Escala X (m11)
+    final double xVal = matrix.storage[12]; // Traslación X (tx)
+    final double yVal = matrix.storage[13]; // Traslación Y (ty)
+
+    // 6. Mapear coordenadas lógicas al espacio de la imagen renderizada
+    final double xCropRendered = (xTl - xVal) / sVal - xImgOffset;
+    final double yCropRendered = (yTl - yVal) / sVal - yImgOffset;
+    final double wCropRendered = wFrame / sVal;
+    final double hCropRendered = hFrame / sVal;
+
+    // 7. Mapear coordenadas al espacio de la imagen física original
+    final double rx = originalWidth / wRender;
+    final double ry = originalHeight / hRender;
+
+    int cropX = (xCropRendered * rx).round();
+    int cropY = (yCropRendered * ry).round();
+    int cropWidth = (wCropRendered * rx).round();
+    int cropHeight = (hCropRendered * ry).round();
+
+    // 8. Validar límites y restringir al tamaño original de la imagen
+    if (cropX < 0) {
+      cropWidth += cropX;
+      cropX = 0;
+    }
+    if (cropY < 0) {
+      cropHeight += cropY;
+      cropY = 0;
+    }
+    if (cropX + cropWidth > originalWidth) {
+      cropWidth = (originalWidth - cropX).round();
+    }
+    if (cropY + cropHeight > originalHeight) {
+      cropHeight = (originalHeight - cropY).round();
+    }
+
+    // Si por algún zoom extremo el tamaño es inválido, usar por defecto
+    if (cropWidth <= 0 || cropHeight <= 0) {
+      notifier.createMobileVersion();
+      return;
+    }
+
+    notifier.createMobileVersion(
+      cropX: cropX,
+      cropY: cropY,
+      cropWidth: cropWidth,
+      cropHeight: cropHeight,
+    );
+  }
+}
+
+class CropOverlayPainter extends CustomPainter {
+  final Size frameSize;
+
+  CropOverlayPainter(this.frameSize);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.65)
+      ..style = PaintingStyle.fill;
+
+    // Camino exterior (todo el visor)
+    final outerPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    // Camino interior (el hueco transparente del móvil)
+    final double left = (size.width - frameSize.width) / 2;
+    final double top = (size.height - frameSize.height) / 2;
+    final innerRect = Rect.fromLTWH(left, top, frameSize.width, frameSize.height);
+    final innerPath = Path()..addRect(innerRect);
+
+    // Combinar restando el interior al exterior para crear el hueco
+    final combinedPath = Path.combine(PathOperation.difference, outerPath, innerPath);
+    canvas.drawPath(combinedPath, paint);
+
+    // Borde de la guía del teléfono
+    final borderPaint = Paint()
+      ..color = const Color(0xFF00B0FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawRect(innerRect, borderPaint);
+
+    // Notch del teléfono
+    final notchRect = Rect.fromLTWH(size.width / 2 - 35, top + 6, 70, 14);
+    final notchPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.8)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(RRect.fromRectAndRadius(notchRect, const Radius.circular(7)), notchPaint);
+
+    // Cuadrícula interior (regla de los tercios)
+    final guidePaint = Paint()
+      ..color = Colors.white24
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    // Guías verticales
+    canvas.drawLine(Offset(left + frameSize.width / 3, top), Offset(left + frameSize.width / 3, top + frameSize.height), guidePaint);
+    canvas.drawLine(Offset(left + 2 * frameSize.width / 3, top), Offset(left + 2 * frameSize.width / 3, top + frameSize.height), guidePaint);
+
+    // Guías horizontales
+    canvas.drawLine(Offset(left, top + frameSize.height / 3), Offset(left + frameSize.width, top + frameSize.height / 3), guidePaint);
+    canvas.drawLine(Offset(left, top + 2 * frameSize.height / 3), Offset(left + frameSize.width, top + 2 * frameSize.height / 3), guidePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CropOverlayPainter oldDelegate) => oldDelegate.frameSize != frameSize;
 }
