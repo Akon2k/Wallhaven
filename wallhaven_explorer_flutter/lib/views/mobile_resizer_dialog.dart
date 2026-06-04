@@ -31,7 +31,6 @@ class MobileResizerDialog extends ConsumerStatefulWidget {
 }
 
 class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
-  late TransformationController _transformationController;
   final GlobalKey _viewerKey = GlobalKey();
 
   PhonePreset _selectedPreset = phonePresets[4]; // Estándar Full HD por defecto
@@ -42,16 +41,19 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
   int _activeHeight = 1920;
   bool _isSaving = false;
 
+  // Coordenadas de scroll de la imagen respecto al marco del móvil
+  // -1.0 indica que deben inicializarse y centrarse en el build
+  double _currentScrollX = -1.0;
+  double _currentScrollY = -1.0;
+
   @override
   void initState() {
     super.initState();
-    _transformationController = TransformationController();
     _updateActiveDimensions();
   }
 
   @override
   void dispose() {
-    _transformationController.dispose();
     _widthController.dispose();
     _heightController.dispose();
     super.dispose();
@@ -67,6 +69,9 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
       if (_activeWidth <= 0) _activeWidth = 1080;
       if (_activeHeight <= 0) _activeHeight = 1920;
     }
+    // Forzar reinicio de coordenadas al cambiar dimensiones
+    _currentScrollX = -1.0;
+    _currentScrollY = -1.0;
   }
 
   @override
@@ -89,7 +94,7 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
         ),
         child: Row(
           children: [
-            // 1. Lado Izquierdo: Editor Interactivo con InteractiveViewer y Overlay
+            // 1. Lado Izquierdo: Editor Interactivo con Desplazamiento Restringido
             Expanded(
               flex: 7,
               child: Container(
@@ -102,26 +107,15 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                         final double wContainer = constraints.maxWidth;
                         final double hContainer = constraints.maxHeight;
 
-                        // Parsear la resolución original
+                        // Parsear la resolución original del wallpaper
                         final parts = widget.wallpaper.resolution.split('x');
                         final double originalWidth = double.tryParse(parts.first) ?? 1920.0;
                         final double originalHeight = double.tryParse(parts.last) ?? 1080.0;
 
-                        // BoxFit.contain de la imagen original en el contenedor
+                        // BoxFit.contain de la imagen original
                         final double imageRatio = originalWidth / originalHeight;
-                        final double containerRatio = wContainer / hContainer;
 
-                        double wRender;
-                        double hRender;
-                        if (imageRatio > containerRatio) {
-                          wRender = wContainer;
-                          hRender = wContainer / imageRatio;
-                        } else {
-                          hRender = hContainer;
-                          wRender = hContainer * imageRatio;
-                        }
-
-                        // Calcular el tamaño del marco del teléfono en pantalla (viewport lógico)
+                        // Calcular el tamaño del marco del teléfono en pantalla
                         double hFrame = hContainer * 0.82;
                         double wFrame = hFrame * targetRatio;
                         if (wFrame > wContainer * 0.82) {
@@ -130,44 +124,115 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                         }
                         final Size frameSize = Size(wFrame, hFrame);
 
-                        return Stack(
-                          key: _viewerKey,
-                          fit: StackFit.expand,
-                          children: [
-                            // InteractiveViewer para zoom/pan de la imagen original
-                            if (state.displayedImagePath.isNotEmpty)
-                              InteractiveViewer(
-                                transformationController: _transformationController,
-                                minScale: 0.1,
-                                maxScale: 10.0,
-                                child: SizedBox(
-                                  width: wContainer,
-                                  height: hContainer,
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: wRender,
-                                      height: hRender,
-                                      child: state.displayedImagePath.startsWith('http')
-                                          ? Image.network(state.displayedImagePath, fit: BoxFit.fill)
-                                          : Image.file(File(state.displayedImagePath), fit: BoxFit.fill),
-                                    ),
-                                  ),
+                        // Determinar eje de movimiento según relación de aspecto
+                        double wRender;
+                        double hRender;
+                        final bool isHorizontalScroll = imageRatio > targetRatio;
+
+                        if (isHorizontalScroll) {
+                          hRender = hFrame;
+                          wRender = hRender * imageRatio;
+                        } else {
+                          wRender = wFrame;
+                          hRender = wRender / imageRatio;
+                        }
+
+                        // Inicializar scroll centrado
+                        if (_currentScrollX == -1.0 && _currentScrollY == -1.0) {
+                          if (isHorizontalScroll) {
+                            _currentScrollX = (wRender - wFrame) / 2;
+                            _currentScrollY = 0.0;
+                          } else {
+                            _currentScrollX = 0.0;
+                            _currentScrollY = (hRender - hFrame) / 2;
+                          }
+                        }
+
+                        // Validar y limitar scrolls
+                        final double maxScrollX = (wRender - wFrame).clamp(0.0, double.infinity);
+                        final double maxScrollY = (hRender - hFrame).clamp(0.0, double.infinity);
+                        _currentScrollX = _currentScrollX.clamp(0.0, maxScrollX);
+                        _currentScrollY = _currentScrollY.clamp(0.0, maxScrollY);
+
+                        // Posiciones
+                        final double xFrame = (wContainer - wFrame) / 2;
+                        final double yFrame = (hContainer - hFrame) / 2;
+
+                        final double xImage = xFrame - _currentScrollX;
+                        final double yImage = yFrame - _currentScrollY;
+
+                        final String imagePath = state.displayedImagePath;
+
+                        Widget imageWidget(double opacityValue) {
+                          if (imagePath.isEmpty) return const SizedBox.shrink();
+                          return Opacity(
+                            opacity: opacityValue,
+                            child: SizedBox(
+                              width: wRender,
+                              height: hRender,
+                              child: imagePath.startsWith('http')
+                                  ? Image.network(imagePath, fit: BoxFit.fill)
+                                  : Image.file(File(imagePath), fit: BoxFit.fill),
+                            ),
+                          );
+                        }
+
+                        return GestureDetector(
+                          onPanUpdate: _isSaving ? null : (details) {
+                            setState(() {
+                              if (isHorizontalScroll) {
+                                _currentScrollX = (_currentScrollX - details.delta.dx).clamp(0.0, maxScrollX);
+                              } else {
+                                _currentScrollY = (_currentScrollY - details.delta.dy).clamp(0.0, maxScrollY);
+                              }
+                            });
+                          },
+                          child: Stack(
+                            key: _viewerKey,
+                            fit: StackFit.expand,
+                            children: [
+                              // Fondo de la imagen oscurecido (30% opacidad)
+                              if (imagePath.isNotEmpty)
+                                Positioned(
+                                  left: xImage,
+                                  top: yImage,
+                                  child: imageWidget(0.30),
+                                ),
+
+                              // Máscara opaca del teléfono
+                              IgnorePointer(
+                                child: CustomPaint(
+                                  size: Size(wContainer, hContainer),
+                                  painter: CropOverlayPainter(frameSize),
                                 ),
                               ),
 
-                            // Overlay visual del teléfono
-                            IgnorePointer(
-                              child: CustomPaint(
-                                size: Size(wContainer, hContainer),
-                                painter: CropOverlayPainter(frameSize),
-                              ),
-                            ),
-                          ],
+                              // Imagen nítida encuadrada dentro de la guía (ClipRect)
+                              if (imagePath.isNotEmpty)
+                                Positioned(
+                                  left: xFrame,
+                                  top: yFrame,
+                                  width: wFrame,
+                                  height: hFrame,
+                                  child: ClipRect(
+                                    child: Stack(
+                                      children: [
+                                        Positioned(
+                                          left: -_currentScrollX,
+                                          top: -_currentScrollY,
+                                          child: imageWidget(1.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         );
                       },
                     ),
 
-                    // Instrucciones de Ajuste
+                    // Instrucciones de Ajuste Restringido
                     Positioned(
                       top: 15,
                       left: 15,
@@ -184,10 +249,10 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.touch_app, color: Color(0xFF7C4DFF), size: 16),
+                                Icon(Icons.swap_horizontal_circle_outlined, color: Color(0xFF00B0FF), size: 16),
                                 SizedBox(width: 8),
                                 Text(
-                                  'Arrastra y pellizca la imagen para encuadrarla en el marco azul',
+                                  'Arrastra lateralmente para elegir el encuadre exacto del wallpaper',
                                   style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
                                 ),
                               ],
@@ -424,50 +489,44 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
         hFrame = wFrame / targetRatio;
       }
 
-      // 4. Tamaño de la imagen renderizada (BoxFit.contain)
+      // 4. Dimensiones de la imagen renderizada (restringida al marco)
       final double imageRatio = originalWidth / originalHeight;
-      final double containerRatio = wContainer / hContainer;
-
       double wRender;
       double hRender;
-      if (imageRatio > containerRatio) {
-        wRender = wContainer;
-        hRender = wContainer / imageRatio;
+      final bool isHorizontalScroll = imageRatio > targetRatio;
+
+      if (isHorizontalScroll) {
+        hRender = hFrame;
+        wRender = hRender * imageRatio;
       } else {
-        hRender = hContainer;
-        wRender = hContainer * imageRatio;
+        wRender = wFrame;
+        hRender = wRender / imageRatio;
       }
 
-      // Offset de la imagen renderizada dentro del contenedor
-      final double xImgOffset = (wContainer - wRender) / 2;
-      final double yImgOffset = (hContainer - hRender) / 2;
+      // 5. Calcular escala de render a físico
+      final double scale = isHorizontalScroll 
+          ? originalHeight / hRender 
+          : originalWidth / wRender;
 
-      // Posición del marco de recorte en coordenadas locales del contenedor
-      final double xTl = (wContainer - wFrame) / 2;
-      final double yTl = (hContainer - hFrame) / 2;
+      // 6. Calcular coordenadas físicas del recorte en base a los scrolls restringidos
+      int cropX = 0;
+      int cropY = 0;
+      int cropWidth = originalWidth.round();
+      int cropHeight = originalHeight.round();
 
-      // 5. Transformación InteractiveViewer
-      final Matrix4 matrix = _transformationController.value;
-      final double sVal = matrix.storage[0];
-      final double xVal = matrix.storage[12];
-      final double yVal = matrix.storage[13];
+      if (isHorizontalScroll) {
+        cropX = (_currentScrollX * scale).round();
+        cropY = 0;
+        cropWidth = (wFrame * scale).round();
+        cropHeight = originalHeight.round();
+      } else {
+        cropX = 0;
+        cropY = (_currentScrollY * scale).round();
+        cropWidth = originalWidth.round();
+        cropHeight = (hFrame * scale).round();
+      }
 
-      // 6. Mapear coordenadas lógicas al espacio de la imagen renderizada
-      final double xCropRendered = (xTl - xVal) / sVal - xImgOffset;
-      final double yCropRendered = (yTl - yVal) / sVal - yImgOffset;
-      final double wCropRendered = wFrame / sVal;
-      final double hCropRendered = hFrame / sVal;
-
-      // 7. Mapear al espacio de la imagen física original
-      final double rx = originalWidth / wRender;
-      final double ry = originalHeight / hRender;
-
-      int cropX = (xCropRendered * rx).round();
-      int cropY = (yCropRendered * ry).round();
-      int cropWidth = (wCropRendered * rx).round();
-      int cropHeight = (hCropRendered * ry).round();
-
-      // 8. Validar límites y restringir al tamaño original
+      // 7. Validar límites y restringir al tamaño original
       if (cropX < 0) {
         cropWidth += cropX;
         cropX = 0;
@@ -483,9 +542,9 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
         cropHeight = (originalHeight - cropY).round();
       }
 
-      // Validar dimensiones
+      // Validar dimensiones resultantes
       if (cropWidth <= 0 || cropHeight <= 0) {
-        throw Exception('El encuadre seleccionado no es válido. Haz zoomout e intenta de nuevo.');
+        throw Exception('El encuadre seleccionado no es válido. Reajusta la imagen e intenta de nuevo.');
       }
 
       // Configurar estado en el notifier
