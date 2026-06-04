@@ -784,12 +784,27 @@ class _MainViewState extends ConsumerState<MainView> {
             if (wp != null)
               ElevatedButton.icon(
                 onPressed: () => notifier.toggleFavorite(),
-                icon: const Icon(Icons.star, color: Colors.white),
-                label: Text(state.isFavorite ? 'Quitar de Favoritos' : 'Añadir a Favoritos'),
+                icon: Icon(
+                  state.isFavorite ? Icons.star : Icons.star_border,
+                  color: state.isFavorite ? const Color(0xFFFFC107) : const Color(0xFF8E8E93), // Gold for favorite, silver/grey otherwise
+                  size: 18,
+                ),
+                label: Text(
+                  state.isFavorite ? 'Quitar de Favoritos' : 'Añadir a Favoritos',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: state.isFavorite ? const Color(0xFFC82333) : const Color(0xFFD39E00),
-                  minimumSize: const Size(double.infinity, 38),
+                  backgroundColor: state.isFavorite ? const Color(0xFF2A241F) : const Color(0xFF25252D), // Subtle amber-dark tint when favorite, neutral dark otherwise
+                  minimumSize: const Size(double.infinity, 40),
+                  side: BorderSide(
+                    color: state.isFavorite ? const Color(0xFF8C6D23) : const Color(0xFF3D3D4C), // Gold/Amber border when active
+                    width: 1,
+                  ),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  elevation: 0,
                 ),
               ),
             const SizedBox(height: 10),
@@ -797,12 +812,17 @@ class _MainViewState extends ConsumerState<MainView> {
             if (wp != null)
               ElevatedButton.icon(
                 onPressed: () => notifier.downloadOriginal(),
-                icon: const Icon(Icons.download, color: Colors.white),
-                label: const Text('Descargar Original'),
+                icon: const Icon(Icons.download, color: Color(0xFF2ECC71), size: 18), // Emerald green icon (soft accent)
+                label: const Text(
+                  'Descargar Original',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF28A745),
-                  minimumSize: const Size(double.infinity, 38),
+                  backgroundColor: const Color(0xFF25252D), // Neutral dark
+                  minimumSize: const Size(double.infinity, 40),
+                  side: const BorderSide(color: Color(0xFF3D3D4C), width: 1),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  elevation: 0,
                 ),
               ),
             const SizedBox(height: 20),
@@ -837,14 +857,36 @@ class _MainViewState extends ConsumerState<MainView> {
                       onChanged: (val) => notifier.updateResizeMode(val!),
                     ),
                     const SizedBox(height: 15),
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       onPressed: () => _handleCreateMobileVersion(state, notifier),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF17A2B8),
-                        minimumSize: const Size(double.infinity, 36),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      icon: const Icon(Icons.crop, color: Colors.white, size: 16),
+                      label: const Text(
+                        'Crear Versión Móvil',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
-                      child: const Text('Crear Versión Móvil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3A3F47), // Neutral dark slate primary action button
+                        minimumSize: const Size(double.infinity, 42),
+                        side: const BorderSide(color: Color(0xFF505662), width: 1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        elevation: 0,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => notifier.openMobileDirectory(),
+                      icon: const Icon(Icons.folder_open, color: Color(0xFFAAAAAA), size: 16),
+                      label: const Text(
+                        'Abrir Carpeta de Destino',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF25252D), // Neutral secondary action button
+                        minimumSize: const Size(double.infinity, 40),
+                        side: const BorderSide(color: Color(0xFF3D3D4C), width: 1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        elevation: 0,
+                      ),
                     ),
                   ],
                 ),

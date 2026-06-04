@@ -55,6 +55,9 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
   - Agregar dependencia `file_picker` en `pubspec.yaml`.
   - Rediseñar campos de texto de rutas en el diálogo de ajustes usando un `Row` con un botón "Examinar".
   - Integrar llamada a `FilePicker.platform.getDirectoryPath()` para abrir el diálogo nativo de selección de directorios y actualizar los controladores.
+- [x] **Tarea 2.10: Rediseño Estético Neutro y Botón "Abrir Carpeta de Destino"** | *AkonDeV 06/2026*
+  - Rediseñar los botones del panel de detalles ("Favoritos", "Descargar Original" y "Crear Versión Móvil") a colores neutros oscuros y profesionales (eliminando amarillos, verdes y celestes chillones).
+  - Añadir un botón completo e independiente de ancho completo ("Abrir Carpeta de Destino") que invoque a `openMobileDirectory` de forma explícita y profesional.
 
 ### FASE 3: QA Y CIERRE
 - [x] **Tarea 3.1: Pruebas unitarias de integración (TDD/SRP)** | *AkonDeV 06/2026*
@@ -68,3 +71,4 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
   - ✅ Seguridad: inputs de API Key sanitizados con `.trim()`. API Key nunca expuesta en logs.
   - ✅ Excepciones: todos los servicios usan `try-catch` con mensajes descriptivos.
   - ✅ Estética: paleta HSL oscura unificada, tipografía consistente, animaciones de transición.
+

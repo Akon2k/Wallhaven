@@ -507,6 +507,36 @@ class MainNotifier extends Notifier<MainState> {
     }
   }
 
+  Future<void> openMobileDirectory() async {
+    // // AkonDeV 06/2026
+    try {
+      final config = await _configService.loadConfig();
+      String targetFolder = config.mobileDirectory;
+      if (targetFolder.isEmpty) {
+        final picDir = await getTemporaryDirectory();
+        targetFolder = p.join(picDir.path, 'WallhavenMobile');
+      }
+      final dir = Directory(targetFolder);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      final uri = Uri.file(targetFolder);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+        state = state.copyWith(statusMessage: 'Abriendo carpeta de reescalados en el explorador...');
+      } else {
+        if (Platform.isWindows) {
+          await Process.run('explorer.exe', [targetFolder]);
+          state = state.copyWith(statusMessage: 'Abriendo carpeta de reescalados...');
+        } else {
+          state = state.copyWith(statusMessage: 'No se pudo abrir el explorador de archivos.');
+        }
+      }
+    } catch (e) {
+      state = state.copyWith(statusMessage: 'Error al intentar abrir la carpeta.');
+    }
+  }
+
   Future<void> toggleFavorite() async {
     // // AkonDeV 06/2026
     final wp = state.selectedWallpaper;
