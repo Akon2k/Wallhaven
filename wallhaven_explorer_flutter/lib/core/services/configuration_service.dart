@@ -11,6 +11,9 @@ class ConfigurationService {
 
   ConfigurationService({String? customPath}) : _customPath = customPath;
 
+  // Retorna true si el servicio opera en modo en-memoria (para tests)
+  bool get _isInMemory => _customPath != null && _customPath!.startsWith(':memory:');
+
   Future<String> _getConfigFilePath() async {
     // // AkonDeV 06/2026
     if (_customPath != null) return _customPath!;
@@ -20,6 +23,9 @@ class ConfigurationService {
 
   Future<AppConfig> loadConfig() async {
     // // AkonDeV 06/2026
+    // Modo en-memoria: retorna configuración por defecto sin tocar el disco
+    if (_isInMemory) return AppConfig();
+
     try {
       final path = await _getConfigFilePath();
       final file = File(path);
@@ -38,6 +44,9 @@ class ConfigurationService {
 
   Future<void> saveConfig(AppConfig config) async {
     // // AkonDeV 06/2026
+    // Modo en-memoria: no persiste nada en disco
+    if (_isInMemory) return;
+
     final path = await _getConfigFilePath();
     final file = File(path);
     if (!await file.parent.exists()) {

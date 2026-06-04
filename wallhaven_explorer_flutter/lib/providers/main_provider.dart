@@ -151,30 +151,23 @@ class MainState {
   }
 }
 
-class MainNotifier extends StateNotifier<MainState> {
-  final WallhavenService _wallhavenService;
-  final ImageProcessorService _imageProcessorService;
-  final DatabaseService _databaseService;
-  final ConfigurationService _configService;
-  final ImageCacheService _imageCacheService;
-
+class MainNotifier extends Notifier<MainState> {
+  // // AkonDeV 06/2026
   Timer? _slideshowTimer;
 
-  MainNotifier({
-    required WallhavenService whService,
-    required ImageProcessorService imgService,
-    required DatabaseService dbService,
-    required ConfigurationService configService,
-    required ImageCacheService imageCacheService,
-  })  : _wallhavenService = whService,
-        _imageProcessorService = imgService,
-        _databaseService = dbService,
-        _configService = configService,
-        _imageCacheService = imageCacheService,
-        super(MainState()) {
-    // Inicialización asíncrona
-    _init();
+  @override
+  MainState build() {
+    ref.onDispose(() => _slideshowTimer?.cancel());
+    Future.microtask(_init);
+    return MainState();
   }
+
+  // Acceso lazy a servicios via ref (Riverpod 3.x)
+  WallhavenService get _wallhavenService => ref.read(whServiceProvider);
+  ImageProcessorService get _imageProcessorService => ref.read(imgProcessorServiceProvider);
+  DatabaseService get _databaseService => ref.read(dbServiceProvider);
+  ConfigurationService get _configService => ref.read(configServiceProvider);
+  ImageCacheService get _imageCacheService => ref.read(cacheServiceProvider);
 
   Future<void> _init() async {
     // // AkonDeV 06/2026
@@ -229,7 +222,9 @@ class MainNotifier extends StateNotifier<MainState> {
 
     try {
       final localPath = await _imageCacheService.getCachedImagePath(wp.id, wp.path);
+      if (!ref.mounted) return; // Guard Riverpod 3.x
       final isFav = await _databaseService.isFavorite(wp.id);
+      if (!ref.mounted) return;
       state = state.copyWith(
         displayedImagePath: localPath,
         isFavorite: isFav,
@@ -237,9 +232,11 @@ class MainNotifier extends StateNotifier<MainState> {
         isLoading: false,
       );
     } catch (e) {
+      if (!ref.mounted) return;
       final isFav = await _databaseService.isFavorite(wp.id);
+      if (!ref.mounted) return;
       state = state.copyWith(
-        displayedImagePath: wp.path, // Fallback a URL
+        displayedImagePath: wp.path,
         isFavorite: isFav,
         statusMessage: 'Error al cachear; mostrando imagen remota.',
         isLoading: false,
@@ -259,6 +256,7 @@ class MainNotifier extends StateNotifier<MainState> {
 
     try {
       final config = await _configService.loadConfig();
+      if (!ref.mounted) return;
       _wallhavenService.apiKey = config.apiKey;
 
       final categories = '${state.categoriesGeneral ? 1 : 0}${state.categoriesAnime ? 1 : 0}${state.categoriesPeople ? 1 : 0}';
@@ -273,6 +271,7 @@ class MainNotifier extends StateNotifier<MainState> {
         ratios: state.selectedSorting == 'random' ? '16x9,16x10,21x9' : '',
         page: state.currentPage,
       );
+      if (!ref.mounted) return;
 
       final List<Wallpaper> list = result['wallpapers'];
       final int lastPage = result['lastPage'];
@@ -284,6 +283,7 @@ class MainNotifier extends StateNotifier<MainState> {
 
       if (list.isNotEmpty) {
         await updateSelectedWallpaper(list.first);
+        if (!ref.mounted) return;
         state = state.copyWith(
           statusMessage: 'Encontrados ${list.length} elementos. Página ${state.currentPage} de $lastPage',
         );
@@ -295,8 +295,10 @@ class MainNotifier extends StateNotifier<MainState> {
       }
 
       await _databaseService.saveSearchHistory(state.searchQuery, '{}');
+      if (!ref.mounted) return;
       await loadHistory();
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(
         statusMessage: 'Error al conectar con Wallhaven.',
         isLoading: false,
@@ -642,14 +644,9 @@ class MainNotifier extends StateNotifier<MainState> {
     state = state.copyWith(isFullScreen: val);
   }
 
-  @override
-  void dispose() {
-    _slideshowTimer?.cancel();
-    super.dispose();
-  }
 }
 
-// Providers globales para inyección
+// Providers globales para inyección (Riverpod 3.x)
 final dioProvider = Provider<Dio>((ref) => Dio());
 
 final configServiceProvider = Provider<ConfigurationService>((ref) => ConfigurationService());
@@ -668,18 +665,7 @@ final cacheServiceProvider = Provider<ImageCacheService>((ref) {
   return ImageCacheService(dio);
 });
 
-final mainProvider = StateNotifierProvider<MainNotifier, MainState>((ref) {
-  final whService = ref.watch(whServiceProvider);
-  final imgService = ref.watch(imgProcessorServiceProvider);
-  final dbService = ref.watch(dbServiceProvider);
-  final configService = ref.watch(configServiceProvider);
-  final cacheService = ref.watch(cacheServiceProvider);
-  
-  return MainNotifier(
-    whService: whService,
-    imgService: imgService,
-    dbService: dbService,
-    configService: configService,
-    imageCacheService: cacheService,
-  );
-});
+// NotifierProvider reemplaza StateNotifierProvider en Riverpod 3.x
+final mainProvider = NotifierProvider<MainNotifier, MainState>(
+  MainNotifier.new,
+);
