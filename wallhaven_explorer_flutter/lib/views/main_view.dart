@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/main_provider.dart';
 import '../models/wallpaper.dart';
 import '../models/app_config.dart';
+import 'mobile_resizer_dialog.dart';
+
 
 class MainView extends ConsumerStatefulWidget {
   const MainView({super.key});
@@ -841,27 +843,17 @@ class _MainViewState extends ConsumerState<MainView> {
                   children: [
                     const Text('REDIMENSIONAR MÓVIL', style: TextStyle(color: Color(0xFF7C4DFF), fontSize: 11, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
-                    const Text('Resolución:', style: TextStyle(color: Color(0xFFAAAAAA), fontSize: 10)),
-                    const SizedBox(height: 4),
-                    _buildDropdown(
-                      value: state.selectedResizeResolution,
-                      items: ['1080x1920', '1440x2560', '720x1280'],
-                      onChanged: (val) => notifier.updateResizeResolution(val!),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text('Modo de Ajuste:', style: TextStyle(color: Color(0xFFAAAAAA), fontSize: 10)),
-                    const SizedBox(height: 4),
-                    _buildDropdown(
-                      value: state.selectedResizeMode,
-                      items: ['SmartCropCentred', 'LetterboxBlack', 'ScaleMaintainAspect', 'ManualCrop'],
-                      onChanged: (val) => notifier.updateResizeMode(val!),
-                    ),
-                    const SizedBox(height: 15),
                     ElevatedButton.icon(
-                      onPressed: () => _handleCreateMobileVersion(state, notifier),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          barrierColor: Colors.black.withValues(alpha: 0.75),
+                          builder: (context) => MobileResizerDialog(wallpaper: wp),
+                        );
+                      },
                       icon: const Icon(Icons.crop, color: Colors.white, size: 16),
                       label: const Text(
-                        'Crear Versión Móvil',
+                        'Ajustar y Crear Móvil',
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -897,31 +889,7 @@ class _MainViewState extends ConsumerState<MainView> {
     );
   }
 
-  Widget _buildDropdown({
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    // // AkonDeV 06/2026
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF3D3D4C)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          dropdownColor: const Color(0xFF2A2A2A),
-          style: const TextStyle(color: Colors.white, fontSize: 12),
-          isExpanded: true,
-          items: items.map((i) => DropdownMenuItem(value: i, child: Text(i))).toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
+
 
   // Barra de Estado
   Widget _buildStatusBar(MainState state) {
@@ -1236,126 +1204,7 @@ class _MainViewState extends ConsumerState<MainView> {
     );
   }
 
-  void _handleCreateMobileVersion(MainState state, MainNotifier notifier) {
-    final wp = state.selectedWallpaper;
-    if (wp == null) return;
 
-    if (!state.isCropModeActive) {
-      notifier.createMobileVersion();
-      return;
-    }
-
-    final renderBox = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) {
-      notifier.createMobileVersion();
-      return;
-    }
-
-    final double wContainer = renderBox.size.width;
-    final double hContainer = renderBox.size.height;
-
-    // 1. Obtener la resolución original de la imagen
-    final parts = wp.resolution.split('x');
-    if (parts.length != 2) {
-      notifier.createMobileVersion();
-      return;
-    }
-    final double originalWidth = double.tryParse(parts[0]) ?? 1920.0;
-    final double originalHeight = double.tryParse(parts[1]) ?? 1080.0;
-
-    // 2. Obtener la resolución de reescalado objetivo (ej. '1080x1920')
-    final resParts = state.selectedResizeResolution.split('x');
-    double targetWidth = 1080.0;
-    double targetHeight = 1920.0;
-    if (resParts.length == 2) {
-      targetWidth = double.tryParse(resParts[0]) ?? 1080.0;
-      targetHeight = double.tryParse(resParts[1]) ?? 1920.0;
-    }
-
-    // Aspect ratio del visor móvil
-    final double targetRatio = targetWidth / targetHeight;
-
-    // 3. Calcular tamaño del marco de recorte en la pantalla (viewport lógico)
-    double hFrame = hContainer * 0.85;
-    double wFrame = hFrame * targetRatio;
-
-    if (wFrame > wContainer * 0.85) {
-      wFrame = wContainer * 0.85;
-      hFrame = wFrame / targetRatio;
-    }
-
-    // 4. Calcular el tamaño de la imagen renderizada al inicio (BoxFit.contain)
-    final double imageRatio = originalWidth / originalHeight;
-    final double containerRatio = wContainer / hContainer;
-
-    double wRender;
-    double hRender;
-    if (imageRatio > containerRatio) {
-      wRender = wContainer;
-      hRender = wContainer / imageRatio;
-    } else {
-      hRender = hContainer;
-      wRender = hContainer * imageRatio;
-    }
-
-    // Offset de la imagen inicial dentro del contenedor
-    final double xImgOffset = (wContainer - wRender) / 2;
-    final double yImgOffset = (hContainer - hRender) / 2;
-
-    // Posición del marco de recorte en coordenadas locales del contenedor
-    final double xTl = (wContainer - wFrame) / 2;
-    final double yTl = (hContainer - hFrame) / 2;
-
-    // 5. Extraer escala y traducciones de la matriz de transformación (storage column-major)
-    final Matrix4 matrix = _transformationController.value;
-    final double sVal = matrix.storage[0];  // Escala X (m11)
-    final double xVal = matrix.storage[12]; // Traslación X (tx)
-    final double yVal = matrix.storage[13]; // Traslación Y (ty)
-
-    // 6. Mapear coordenadas lógicas al espacio de la imagen renderizada
-    final double xCropRendered = (xTl - xVal) / sVal - xImgOffset;
-    final double yCropRendered = (yTl - yVal) / sVal - yImgOffset;
-    final double wCropRendered = wFrame / sVal;
-    final double hCropRendered = hFrame / sVal;
-
-    // 7. Mapear coordenadas al espacio de la imagen física original
-    final double rx = originalWidth / wRender;
-    final double ry = originalHeight / hRender;
-
-    int cropX = (xCropRendered * rx).round();
-    int cropY = (yCropRendered * ry).round();
-    int cropWidth = (wCropRendered * rx).round();
-    int cropHeight = (hCropRendered * ry).round();
-
-    // 8. Validar límites y restringir al tamaño original de la imagen
-    if (cropX < 0) {
-      cropWidth += cropX;
-      cropX = 0;
-    }
-    if (cropY < 0) {
-      cropHeight += cropY;
-      cropY = 0;
-    }
-    if (cropX + cropWidth > originalWidth) {
-      cropWidth = (originalWidth - cropX).round();
-    }
-    if (cropY + cropHeight > originalHeight) {
-      cropHeight = (originalHeight - cropY).round();
-    }
-
-    // Si por algún zoom extremo el tamaño es inválido, usar por defecto
-    if (cropWidth <= 0 || cropHeight <= 0) {
-      notifier.createMobileVersion();
-      return;
-    }
-
-    notifier.createMobileVersion(
-      cropX: cropX,
-      cropY: cropY,
-      cropWidth: cropWidth,
-      cropHeight: cropHeight,
-    );
-  }
 }
 
 class CropOverlayPainter extends CustomPainter {
