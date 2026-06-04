@@ -61,6 +61,11 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
   - Integrar InteractiveViewer con un marco azul de relación de aspecto dinámica y regla de tercios para encuadrar y ajustar el recorte manualmente.
   - Rediseñar los botones del panel de detalles ("Favoritos", "Descargar Original" y "Ajustar y Crear Móvil") con una paleta neutra, elegante y profesional.
   - Añadir un botón completo e independiente de ancho completo ("Abrir Carpeta de Destino") que invoque a `openMobileDirectory` de forma explícita.
+- [x] **Tarea 2.11: Soporte de Tema Claro ("Light") y Oscuro ("Dark") Reactivo** | *AkonDeV 06/2026*
+  - Reemplazar constantes de colores oscuros hardcodeados por variables condicionales basadas en `state.appConfig.theme == 'Light'`.
+  - Adaptar MaterialApp, barra lateral, grilla de resultados, visor interactivo y panel de detalles.
+  - Adaptar la barra de estado inferior para que tenga fondo y textos adecuados en modo claro.
+  - Diseñar el diálogo de Configuración Maestra con colores adaptativos interactivos (previsualización en caliente antes de guardar).
 
 
 ### FASE 3: QA Y CIERRE

@@ -51,13 +51,14 @@ class _MainViewState extends ConsumerState<MainView> {
 
     // Ajustar visibilidad general según modo pantalla completa
     final bool showPanels = !state.isFullScreen;
+    final bool isLight = state.appConfig.theme == 'Light';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F12),
+      backgroundColor: isLight ? const Color(0xFFF4F4F6) : const Color(0xFF0F0F12),
       body: Row(
         children: [
           // 1. Barra de Navegación Lateral Izquierda
-          if (showPanels) _buildLeftNavBar(context, state, notifier),
+          if (showPanels) _buildLeftNavBar(context, state, notifier, isLight),
 
           // 2. Cuerpo Principal
           Expanded(
@@ -96,13 +97,13 @@ class _MainViewState extends ConsumerState<MainView> {
   }
 
   // Barra de Navegación Lateral
-  Widget _buildLeftNavBar(BuildContext context, MainState state, MainNotifier notifier) {
+  Widget _buildLeftNavBar(BuildContext context, MainState state, MainNotifier notifier, bool isLight) {
     // // AkonDeV 06/2026
     return Container(
       width: 70,
-      decoration: const BoxDecoration(
-        color: Color(0xFF15151A),
-        border: Border(right: BorderSide(color: Color(0xFF25252D), width: 1)),
+      decoration: BoxDecoration(
+        color: isLight ? const Color(0xFFECECEF) : const Color(0xFF15151A),
+        border: Border(right: BorderSide(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF25252D), width: 1)),
       ),
       child: Column(
         children: [
@@ -112,18 +113,21 @@ class _MainViewState extends ConsumerState<MainView> {
             label: 'Buscar',
             isSelected: state.selectedTabIndex == 0,
             onTap: () => notifier.setSelectedTabIndex(0),
+            isLight: isLight,
           ),
           _buildNavIcon(
             icon: Icons.star,
             label: 'Favoritos',
             isSelected: state.selectedTabIndex == 1,
             onTap: () => notifier.setSelectedTabIndex(1),
+            isLight: isLight,
           ),
           _buildNavIcon(
             icon: Icons.history,
             label: 'Historial',
             isSelected: state.selectedTabIndex == 2,
             onTap: () => notifier.setSelectedTabIndex(2),
+            isLight: isLight,
           ),
           const Spacer(),
           _buildNavIcon(
@@ -131,6 +135,7 @@ class _MainViewState extends ConsumerState<MainView> {
             label: 'Ajustes',
             isSelected: false,
             onTap: () => _showSettingsDialog(context, state, notifier),
+            isLight: isLight,
           ),
           const SizedBox(height: 20),
         ],
@@ -143,14 +148,19 @@ class _MainViewState extends ConsumerState<MainView> {
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
+    required bool isLight,
   }) {
     // // AkonDeV 06/2026
+    final Color hoverColor = isLight ? const Color(0xFFD6D6DF) : const Color(0xFF20202B);
+    final Color iconUnselected = isLight ? const Color(0xFF6E6E76) : const Color(0xFF8E8E93);
+    final Color textUnselected = isLight ? const Color(0xFF55555C) : const Color(0xFF8E8E93);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 70,
         width: 70,
-        color: isSelected ? const Color(0xFF20202B) : Colors.transparent,
+        color: isSelected ? hoverColor : Colors.transparent,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -169,12 +179,12 @@ class _MainViewState extends ConsumerState<MainView> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: isSelected ? const Color(0xFF7C4DFF) : const Color(0xFF8E8E93), size: 24),
+                Icon(icon, color: isSelected ? const Color(0xFF7C4DFF) : iconUnselected, size: 24),
                 const SizedBox(height: 4),
                 Text(
                   label,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : const Color(0xFF8E8E93),
+                    color: isSelected ? (isLight ? const Color(0xFF1E1E24) : Colors.white) : textUnselected,
                     fontSize: 10,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -233,13 +243,15 @@ class _MainViewState extends ConsumerState<MainView> {
 
   Widget _buildSearchHeader(MainState state, MainNotifier notifier) {
     // // AkonDeV 06/2026
+    final bool isLight = state.appConfig.theme == 'Light';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E24),
+        color: isLight ? Colors.white : const Color(0xFF1E1E24),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF2D2D37)),
+        border: Border.all(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37)),
       ),
       child: Column(
         children: [
@@ -253,16 +265,16 @@ class _MainViewState extends ConsumerState<MainView> {
                       ..selection = TextSelection.fromPosition(TextPosition(offset: state.searchQuery.length)),
                     onChanged: notifier.setSearchQuery,
                     onSubmitted: (_) => notifier.searchNewQuery(),
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'Buscar fondos de pantalla...',
                       hintStyle: const TextStyle(color: Color(0xFF8E8E93)),
-                      fillColor: const Color(0xFF121214),
+                      fillColor: isLight ? const Color(0xFFF0F0F3) : const Color(0xFF121214),
                       filled: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
-                        borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                        borderSide: BorderSide(color: isLight ? const Color(0xFFD0D0D5) : const Color(0xFF3D3D4C)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -288,14 +300,14 @@ class _MainViewState extends ConsumerState<MainView> {
           Row(
             children: [
               const Text('Categorías: ', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 12, fontWeight: FontWeight.bold)),
-              _buildCheckbox('General', state.categoriesGeneral, (val) => notifier.updateCategories(gen: val)),
-              _buildCheckbox('Anime', state.categoriesAnime, (val) => notifier.updateCategories(anime: val)),
-              _buildCheckbox('People', state.categoriesPeople, (val) => notifier.updateCategories(people: val)),
+              _buildCheckbox('General', state.categoriesGeneral, (val) => notifier.updateCategories(gen: val), isLight),
+              _buildCheckbox('Anime', state.categoriesAnime, (val) => notifier.updateCategories(anime: val), isLight),
+              _buildCheckbox('People', state.categoriesPeople, (val) => notifier.updateCategories(people: val), isLight),
               const SizedBox(width: 15),
               const Text('Pureza: ', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 12, fontWeight: FontWeight.bold)),
-              _buildCheckbox('SFW', state.puritySfw, (val) => notifier.updatePurity(sfw: val)),
-              _buildCheckbox('Sketchy', state.puritySketchy, (val) => notifier.updatePurity(sketchy: val)),
-              _buildCheckbox('NSFW', state.purityNsfw, (val) => notifier.updatePurity(nsfw: val)),
+              _buildCheckbox('SFW', state.puritySfw, (val) => notifier.updatePurity(sfw: val), isLight),
+              _buildCheckbox('Sketchy', state.puritySketchy, (val) => notifier.updatePurity(sketchy: val), isLight),
+              _buildCheckbox('NSFW', state.purityNsfw, (val) => notifier.updatePurity(nsfw: val), isLight),
             ],
           ),
         ],
@@ -303,7 +315,7 @@ class _MainViewState extends ConsumerState<MainView> {
     );
   }
 
-  Widget _buildCheckbox(String label, bool value, ValueChanged<bool?> onChanged) {
+  Widget _buildCheckbox(String label, bool value, ValueChanged<bool?> onChanged, bool isLight) {
     // // AkonDeV 06/2026
     return Row(
       children: [
@@ -312,9 +324,9 @@ class _MainViewState extends ConsumerState<MainView> {
           onChanged: onChanged,
           activeColor: const Color(0xFF7C4DFF),
           checkColor: Colors.white,
-          side: const BorderSide(color: Color(0xFF8E8E93)),
+          side: BorderSide(color: isLight ? const Color(0xFF6E6E76) : const Color(0xFF8E8E93)),
         ),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+        Text(label, style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 12)),
       ],
     );
   }
@@ -322,11 +334,13 @@ class _MainViewState extends ConsumerState<MainView> {
   // Grilla de Tarjetas
   Widget _buildWallpaperGrid(List<Wallpaper> list, MainState state, MainNotifier notifier) {
     // // AkonDeV 06/2026
+    final bool isLight = state.appConfig.theme == 'Light';
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E24),
+        color: isLight ? Colors.white : const Color(0xFF1E1E24),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF2D2D37)),
+        border: Border.all(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37)),
       ),
       child: GridView.builder(
         padding: const EdgeInsets.all(8),
@@ -407,41 +421,43 @@ class _MainViewState extends ConsumerState<MainView> {
   // Visor Interactivo
   Widget _buildInteractiveViewer(MainState state, MainNotifier notifier) {
     // // AkonDeV 06/2026
+    final bool isLight = state.appConfig.theme == 'Light';
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E24),
+        color: isLight ? Colors.white : const Color(0xFF1E1E24),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF2D2D37)),
+        border: Border.all(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           // Barra de Herramientas Superior del Visor
           Container(
-            color: const Color(0xFF18181C),
+            color: isLight ? const Color(0xFFF0F0F3) : const Color(0xFF18181C),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Row(
               children: [
                 const Spacer(),
                 // Alternar Grilla
                 IconButton(
-                  icon: const Icon(Icons.grid_view, color: Colors.white, size: 18),
+                  icon: Icon(Icons.grid_view, color: isLight ? Colors.black87 : Colors.white, size: 18),
                   tooltip: 'Mostrar/Ocultar Grilla',
                   onPressed: () => notifier.toggleGridView(),
                 ),
                 // Alternar Info
                 IconButton(
-                  icon: const Icon(Icons.info_outline, color: Colors.white, size: 18),
+                  icon: Icon(Icons.info_outline, color: isLight ? Colors.black87 : Colors.white, size: 18),
                   tooltip: 'Mostrar/Ocultar Info',
                   onPressed: () => notifier.toggleDetailsPanel(),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.copy, color: Colors.white, size: 18),
+                  icon: Icon(Icons.copy, color: isLight ? Colors.black87 : Colors.white, size: 18),
                   tooltip: 'Copiar URL',
                   onPressed: () => notifier.copyUrlToClipboard(),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.open_in_new, color: Colors.white, size: 18),
+                  icon: Icon(Icons.open_in_new, color: isLight ? Colors.black87 : Colors.white, size: 18),
                   tooltip: 'Ver en Web',
                   onPressed: () => notifier.openInBrowser(),
                 ),
@@ -515,7 +531,7 @@ class _MainViewState extends ConsumerState<MainView> {
 
                 return Container(
                   key: _viewerKey,
-                  color: const Color(0xFF121214),
+                  color: isLight ? const Color(0xFFF4F4F6) : const Color(0xFF121214),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -597,31 +613,31 @@ class _MainViewState extends ConsumerState<MainView> {
 
           // Barra de Navegación inferior interna
           Container(
-            color: const Color(0xFF18181C),
+            color: isLight ? const Color(0xFFF0F0F3) : const Color(0xFF18181C),
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.first_page, color: Colors.white),
+                  icon: Icon(Icons.first_page, color: isLight ? Colors.black87 : Colors.white),
                   onPressed: notifier.canNavigateFirst() ? () => notifier.navigateFirst() : null,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.chevron_left, color: Colors.white),
+                  icon: Icon(Icons.chevron_left, color: isLight ? Colors.black87 : Colors.white),
                   onPressed: notifier.canNavigatePrevious() ? () => notifier.navigatePrevious() : null,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   notifier.imagePositionText,
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 10),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right, color: Colors.white),
+                  icon: Icon(Icons.chevron_right, color: isLight ? Colors.black87 : Colors.white),
                   onPressed: notifier.canNavigateNext() ? () => notifier.navigateNext() : null,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.last_page, color: Colors.white),
+                  icon: Icon(Icons.last_page, color: isLight ? Colors.black87 : Colors.white),
                   onPressed: notifier.canNavigateLast() ? () => notifier.navigateLast() : null,
                 ),
               ],
@@ -635,24 +651,28 @@ class _MainViewState extends ConsumerState<MainView> {
   // Paginador de Páginas
   Widget _buildPaginator(MainState state, MainNotifier notifier) {
     // // AkonDeV 06/2026
+    final bool isLight = state.appConfig.theme == 'Light';
+    final Color btnBg = isLight ? const Color(0xFFDCDCE2) : const Color(0xFF2E2E38);
+    final Color textCol = isLight ? Colors.black87 : Colors.white;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
           onPressed: state.currentPage > 1 ? () => notifier.goToPreviousPage() : null,
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E2E38)),
-          child: const Text('◀◀ Pág. Anterior', style: TextStyle(color: Colors.white)),
+          style: ElevatedButton.styleFrom(backgroundColor: btnBg),
+          child: Text('◀◀ Pág. Anterior', style: TextStyle(color: textCol)),
         ),
         const SizedBox(width: 20),
         Text(
           'Página ${state.currentPage} de ${state.maxPages}',
-          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+          style: TextStyle(color: textCol, fontSize: 13, fontWeight: FontWeight.bold),
         ),
         const SizedBox(width: 20),
         ElevatedButton(
           onPressed: state.currentPage < state.maxPages ? () => notifier.goToNextPage() : null,
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E2E38)),
-          child: const Text('Pág. Siguiente ▶▶', style: TextStyle(color: Colors.white)),
+          style: ElevatedButton.styleFrom(backgroundColor: btnBg),
+          child: Text('Pág. Siguiente ▶▶', style: TextStyle(color: textCol)),
         ),
       ],
     );
@@ -679,6 +699,8 @@ class _MainViewState extends ConsumerState<MainView> {
   // Pestaña 2: Historial
   Widget _buildHistoryTab(BuildContext context, MainState state, MainNotifier notifier) {
     // // AkonDeV 06/2026
+    final bool isLight = state.appConfig.theme == 'Light';
+
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
@@ -689,9 +711,9 @@ class _MainViewState extends ConsumerState<MainView> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E24),
+                color: isLight ? Colors.white : const Color(0xFF1E1E24),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF2D2D37)),
+                border: Border.all(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37)),
               ),
               child: ListView.builder(
                 padding: const EdgeInsets.all(8),
@@ -700,7 +722,7 @@ class _MainViewState extends ConsumerState<MainView> {
                   final item = state.searchHistory[index];
                   return ListTile(
                     leading: const Icon(Icons.search, color: Color(0xFF7C4DFF)),
-                    title: Text(item, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                    title: Text(item, style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
                     onTap: () {
                       notifier.searchQueryFromHistory(item);
                       notifier.setSelectedTabIndex(0);
@@ -719,12 +741,13 @@ class _MainViewState extends ConsumerState<MainView> {
   Widget _buildDetailsPanel(BuildContext context, MainState state, MainNotifier notifier) {
     // // AkonDeV 06/2026
     final wp = state.selectedWallpaper;
+    final bool isLight = state.appConfig.theme == 'Light';
 
     return Container(
       width: 320,
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E1E24),
-        border: Border(left: BorderSide(color: Color(0xFF2D2D37), width: 1)),
+      decoration: BoxDecoration(
+        color: isLight ? Colors.white : const Color(0xFF1E1E24),
+        border: Border(left: BorderSide(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37), width: 1)),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(15),
@@ -749,7 +772,7 @@ class _MainViewState extends ConsumerState<MainView> {
                 height: 140,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFF33333C)),
+                  border: Border.all(color: isLight ? const Color(0xFFDCDCE2) : const Color(0xFF33333C)),
                   image: DecorationImage(
                     image: NetworkImage(wp.thumbnailUrl),
                     fit: BoxFit.cover,
@@ -763,20 +786,20 @@ class _MainViewState extends ConsumerState<MainView> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF121214),
+                  color: isLight ? const Color(0xFFF0F0F3) : const Color(0xFF121214),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFF2D2D37)),
+                  border: Border.all(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('ID: ${wp.id}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('ID: ${wp.id}', style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
-                    Text('Resolución: ${wp.resolution}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('Resolución: ${wp.resolution}', style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
-                    Text('Categoría: ${wp.category}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('Categoría: ${wp.category}', style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
-                    Text('Autor: ${wp.uploader}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('Autor: ${wp.uploader}', style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -793,16 +816,22 @@ class _MainViewState extends ConsumerState<MainView> {
                 ),
                 label: Text(
                   state.isFavorite ? 'Quitar de Favoritos' : 'Añadir a Favoritos',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: state.isFavorite 
+                        ? (isLight ? const Color(0xFF8C6D23) : Colors.white) 
+                        : (isLight ? Colors.black87 : Colors.white),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: state.isFavorite ? const Color(0xFF2A241F) : const Color(0xFF25252D), // Subtle amber-dark tint when favorite, neutral dark otherwise
+                  backgroundColor: state.isFavorite 
+                      ? (isLight ? const Color(0xFFFFFDE7) : const Color(0xFF2A241F)) 
+                      : (isLight ? const Color(0xFFECECEF) : const Color(0xFF25252D)),
                   minimumSize: const Size(double.infinity, 40),
                   side: BorderSide(
-                    color: state.isFavorite ? const Color(0xFF8C6D23) : const Color(0xFF3D3D4C), // Gold/Amber border when active
+                    color: state.isFavorite 
+                        ? (isLight ? const Color(0xFFD4AF37) : const Color(0xFF8C6D23)) 
+                        : (isLight ? const Color(0xFFD3D3D9) : const Color(0xFF3D3D4C)),
                     width: 1,
                   ),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -815,14 +844,14 @@ class _MainViewState extends ConsumerState<MainView> {
               ElevatedButton.icon(
                 onPressed: () => notifier.downloadOriginal(),
                 icon: const Icon(Icons.download, color: Color(0xFF2ECC71), size: 18), // Emerald green icon (soft accent)
-                label: const Text(
+                label: Text(
                   'Descargar Original',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25252D), // Neutral dark
+                  backgroundColor: isLight ? const Color(0xFFECECEF) : const Color(0xFF25252D),
                   minimumSize: const Size(double.infinity, 40),
-                  side: const BorderSide(color: Color(0xFF3D3D4C), width: 1),
+                  side: BorderSide(color: isLight ? const Color(0xFFD3D3D9) : const Color(0xFF3D3D4C), width: 1),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   elevation: 0,
                 ),
@@ -834,9 +863,9 @@ class _MainViewState extends ConsumerState<MainView> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF121214),
+                  color: isLight ? const Color(0xFFF0F0F3) : const Color(0xFF121214),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFF2D2D37)),
+                  border: Border.all(color: isLight ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -851,15 +880,15 @@ class _MainViewState extends ConsumerState<MainView> {
                           builder: (context) => MobileResizerDialog(wallpaper: wp),
                         );
                       },
-                      icon: const Icon(Icons.crop, color: Colors.white, size: 16),
-                      label: const Text(
+                      icon: Icon(Icons.crop, color: isLight ? Colors.black87 : Colors.white, size: 16),
+                      label: Text(
                         'Ajustar y Crear Móvil',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3A3F47), // Neutral dark slate primary action button
+                        backgroundColor: isLight ? const Color(0xFFD0D3D9) : const Color(0xFF3A3F47),
                         minimumSize: const Size(double.infinity, 42),
-                        side: const BorderSide(color: Color(0xFF505662), width: 1),
+                        side: BorderSide(color: isLight ? const Color(0xFFB0B4BC) : const Color(0xFF505662), width: 1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                         elevation: 0,
                       ),
@@ -868,14 +897,14 @@ class _MainViewState extends ConsumerState<MainView> {
                     ElevatedButton.icon(
                       onPressed: () => notifier.openMobileDirectory(),
                       icon: const Icon(Icons.folder_open, color: Color(0xFFAAAAAA), size: 16),
-                      label: const Text(
+                      label: Text(
                         'Abrir Carpeta de Destino',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                        style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF25252D), // Neutral secondary action button
+                        backgroundColor: isLight ? const Color(0xFFECECEF) : const Color(0xFF25252D),
                         minimumSize: const Size(double.infinity, 40),
-                        side: const BorderSide(color: Color(0xFF3D3D4C), width: 1),
+                        side: BorderSide(color: isLight ? const Color(0xFFD3D3D9) : const Color(0xFF3D3D4C), width: 1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                         elevation: 0,
                       ),
@@ -894,15 +923,16 @@ class _MainViewState extends ConsumerState<MainView> {
   // Barra de Estado
   Widget _buildStatusBar(MainState state) {
     // // AkonDeV 06/2026
+    final bool isLight = state.appConfig.theme == 'Light';
     return Container(
-      color: const Color(0xFF18181C),
+      color: isLight ? const Color(0xFFECECEF) : const Color(0xFF18181C),
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
       child: Row(
         children: [
           Expanded(
             child: Text(
               state.statusMessage,
-              style: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 11),
+              style: TextStyle(color: isLight ? Colors.black54 : const Color(0xFFAAAAAA), fontSize: 11),
             ),
           ),
           if (state.downloadProgress > 0 && state.downloadProgress < 100)
@@ -929,15 +959,27 @@ class _MainViewState extends ConsumerState<MainView> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            final bool isLightLocal = selectedTheme == 'Light';
+            final Color dialogBg = isLightLocal ? const Color(0xFFF4F4F6) : const Color(0xFF1E1E24);
+            final Color borderCol = isLightLocal ? const Color(0xFFE2E2E6) : const Color(0xFF2D2D37);
+            final Color textColor = isLightLocal ? Colors.black87 : Colors.white;
+            final Color subTextColor = isLightLocal ? const Color(0xFF55555C) : const Color(0xFF8E8E93);
+            final Color inputBg = isLightLocal ? const Color(0xFFECECEF) : const Color(0xFF0F0F12);
+            final Color inputBorder = isLightLocal ? const Color(0xFFD3D3D9) : const Color(0xFF3D3D4C);
+            final Color btnBg = isLightLocal ? const Color(0xFFECECEF) : const Color(0xFF2D2D37);
+            final Color btnBorder = isLightLocal ? const Color(0xFFD3D3D9) : const Color(0xFF2D2D37);
+            final Color btnText = isLightLocal ? Colors.black87 : Colors.white;
+            final Color dropdownBg = isLightLocal ? Colors.white : const Color(0xFF0F0F12);
+
             return Dialog(
-              backgroundColor: const Color(0xFF1E1E24),
+              backgroundColor: dialogBg,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Container(
                 width: 500,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF2D2D37)),
+                  border: Border.all(color: borderCol),
                 ),
                 child: SingleChildScrollView(
                   child: Column(
@@ -948,10 +990,10 @@ class _MainViewState extends ConsumerState<MainView> {
                         children: [
                           const Icon(Icons.settings, color: Color(0xFF7C4DFF), size: 24),
                           const SizedBox(width: 10),
-                          const Text(
+                          Text(
                             'CONFIGURACIÓN MAESTRA',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: textColor,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
@@ -965,26 +1007,26 @@ class _MainViewState extends ConsumerState<MainView> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Divider(color: Color(0xFF2D2D37)),
+                      Divider(color: borderCol),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'WALLHAVEN API KEY',
-                        style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
                       TextField(
                         controller: apiKeyController,
                         obscureText: true,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        style: TextStyle(color: textColor, fontSize: 13),
                         decoration: InputDecoration(
                           hintText: 'Pega tu API Key de Wallhaven aquí...',
-                          hintStyle: const TextStyle(color: Color(0xFF555566)),
-                          fillColor: const Color(0xFF0F0F12),
+                          hintStyle: TextStyle(color: isLightLocal ? const Color(0xFF999999) : const Color(0xFF555566)),
+                          fillColor: inputBg,
                           filled: true,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                            borderSide: BorderSide(color: inputBorder),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
@@ -993,9 +1035,9 @@ class _MainViewState extends ConsumerState<MainView> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text(
+                      Text(
                         'CARPETA DE DESCARGAS',
-                        style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -1003,16 +1045,16 @@ class _MainViewState extends ConsumerState<MainView> {
                           Expanded(
                             child: TextField(
                               controller: downloadDirController,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                              style: TextStyle(color: textColor, fontSize: 13),
                               decoration: InputDecoration(
                                 hintText: 'Ruta absoluta (Ej: C:/Downloads/Wallhaven)',
-                                hintStyle: const TextStyle(color: Color(0xFF555566)),
-                                fillColor: const Color(0xFF0F0F12),
+                                hintStyle: TextStyle(color: isLightLocal ? const Color(0xFF999999) : const Color(0xFF555566)),
+                                fillColor: inputBg,
                                 filled: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                                  borderSide: BorderSide(color: inputBorder),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
@@ -1029,20 +1071,21 @@ class _MainViewState extends ConsumerState<MainView> {
                                 downloadDirController.text = selectedDirectory;
                               }
                             },
-                            icon: const Icon(Icons.folder_open, size: 16, color: Colors.white),
-                            label: const Text('Examinar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                            icon: Icon(Icons.folder_open, size: 16, color: btnText),
+                            label: Text('Examinar', style: TextStyle(color: btnText, fontSize: 12, fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2D2D37),
+                              backgroundColor: btnBg,
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              side: BorderSide(color: btnBorder),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      const Text(
+                      Text(
                         'CARPETA REESCALADO MÓVIL',
-                        style: TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -1050,16 +1093,16 @@ class _MainViewState extends ConsumerState<MainView> {
                           Expanded(
                             child: TextField(
                               controller: mobileDirController,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                              style: TextStyle(color: textColor, fontSize: 13),
                               decoration: InputDecoration(
                                 hintText: 'Ruta absoluta (Ej: C:/Downloads/WallhavenMobile)',
-                                hintStyle: const TextStyle(color: Color(0xFF555566)),
-                                fillColor: const Color(0xFF0F0F12),
+                                hintStyle: TextStyle(color: isLightLocal ? const Color(0xFF999999) : const Color(0xFF555566)),
+                                fillColor: inputBg,
                                 filled: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: Color(0xFF3D3D4C)),
+                                  borderSide: BorderSide(color: inputBorder),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
@@ -1076,11 +1119,12 @@ class _MainViewState extends ConsumerState<MainView> {
                                 mobileDirController.text = selectedDirectory;
                               }
                             },
-                            icon: const Icon(Icons.folder_open, size: 16, color: Colors.white),
-                            label: const Text('Examinar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                            icon: Icon(Icons.folder_open, size: 16, color: btnText),
+                            label: Text('Examinar', style: TextStyle(color: btnText, fontSize: 12, fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2D2D37),
+                              backgroundColor: btnBg,
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              side: BorderSide(color: btnBorder),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                             ),
                           ),
@@ -1093,26 +1137,29 @@ class _MainViewState extends ConsumerState<MainView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'RESOLUCIÓN MÓVIL DEFECTO',
-                                  style: TextStyle(color: Color(0xFF8E8E93), fontSize: 10, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0F0F12),
+                                    color: inputBg,
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: const Color(0xFF3D3D4C)),
+                                    border: Border.all(color: inputBorder),
                                   ),
                                   child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       value: selectedResize,
-                                      dropdownColor: const Color(0xFF0F0F12),
-                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      dropdownColor: dropdownBg,
+                                      style: TextStyle(color: textColor, fontSize: 12),
                                       isExpanded: true,
                                       items: ['1080x1920', '1440x2560', '720x1280'].map((i) {
-                                        return DropdownMenuItem(value: i, child: Text(i));
+                                        return DropdownMenuItem(
+                                          value: i,
+                                          child: Text(i, style: TextStyle(color: textColor)),
+                                        );
                                       }).toList(),
                                       onChanged: (val) {
                                         if (val != null) setState(() => selectedResize = val);
@@ -1128,26 +1175,29 @@ class _MainViewState extends ConsumerState<MainView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'TEMA VISUAL',
-                                  style: TextStyle(color: Color(0xFF8E8E93), fontSize: 10, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0F0F12),
+                                    color: inputBg,
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: const Color(0xFF3D3D4C)),
+                                    border: Border.all(color: inputBorder),
                                   ),
                                   child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       value: selectedTheme,
-                                      dropdownColor: const Color(0xFF0F0F12),
-                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      dropdownColor: dropdownBg,
+                                      style: TextStyle(color: textColor, fontSize: 12),
                                       isExpanded: true,
                                       items: ['Dark', 'Light'].map((i) {
-                                        return DropdownMenuItem(value: i, child: Text(i));
+                                        return DropdownMenuItem(
+                                          value: i,
+                                          child: Text(i, style: TextStyle(color: textColor)),
+                                        );
                                       }).toList(),
                                       onChanged: (val) {
                                         if (val != null) setState(() => selectedTheme = val);
@@ -1166,7 +1216,7 @@ class _MainViewState extends ConsumerState<MainView> {
                         children: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF8E8E93))),
+                            child: Text('Cancelar', style: TextStyle(color: subTextColor)),
                           ),
                           const SizedBox(width: 12),
                           ElevatedButton(

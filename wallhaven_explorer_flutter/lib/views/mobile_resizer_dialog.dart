@@ -77,12 +77,27 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mainProvider);
+    final bool isLight = state.appConfig.theme == 'Light';
+
+    // Paleta de colores condicional
+    final Color dialogBg = isLight ? const Color(0xFFF4F4F6) : const Color(0xFF15151A);
+    final Color panelBg = isLight ? Colors.white : const Color(0xFF18181C);
+    final Color borderCol = isLight ? const Color(0xFFE2E2E6) : const Color(0xFF25252D);
+    final Color cardBg = isLight ? const Color(0xFFECECEF) : const Color(0xFF0F0F12);
+    final Color inputBg = isLight ? const Color(0xFFECECEF) : const Color(0xFF202026);
+    final Color dropdownMenuBg = isLight ? Colors.white : const Color(0xFF15151A);
+    final Color textColor = isLight ? Colors.black87 : Colors.white;
+    final Color subTextColor = isLight ? Colors.black54 : const Color(0xFFAAAAAA);
+    final Color btnCancelBg = isLight ? const Color(0xFFECECEF) : const Color(0xFF25252D);
+    final Color btnCancelBorder = isLight ? const Color(0xFFD3D3D9) : const Color(0xFF2D2D37);
+    final Color buttonSaveBg = isLight ? const Color(0xFFD0D3D9) : const Color(0xFF3A3F47);
+    final Color buttonSaveBorder = isLight ? const Color(0xFFB0B4BC) : const Color(0xFF505662);
 
     // Calcular la relación de aspecto del móvil
     final double targetRatio = _activeWidth / _activeHeight;
 
     return Dialog(
-      backgroundColor: const Color(0xFF15151A),
+      backgroundColor: dialogBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: Container(
@@ -90,7 +105,7 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
         height: 650,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF25252D)),
+          border: Border.all(color: borderCol),
         ),
         child: Row(
           children: [
@@ -98,7 +113,7 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
             Expanded(
               flex: 7,
               child: Container(
-                color: const Color(0xFF0F0F12),
+                color: isLight ? const Color(0xFFE9E9EC) : const Color(0xFF0F0F12),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -242,18 +257,18 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E24).withValues(alpha: 0.85),
+                              color: (isLight ? Colors.white : const Color(0xFF1E1E24)).withValues(alpha: 0.85),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF2D2D37)),
+                              border: Border.all(color: borderCol),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.swap_horizontal_circle_outlined, color: Color(0xFF00B0FF), size: 16),
-                                SizedBox(width: 8),
+                                const Icon(Icons.swap_horizontal_circle_outlined, color: Color(0xFF00B0FF), size: 16),
+                                const SizedBox(width: 8),
                                 Text(
                                   'Arrastra lateralmente para elegir el encuadre exacto del wallpaper',
-                                  style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
+                                  style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w500),
                                 ),
                               ],
                             ),
@@ -280,9 +295,9 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
             // 2. Lado Derecho: Panel de Configuración
             Container(
               width: 320,
-              decoration: const BoxDecoration(
-                color: Color(0xFF18181C),
-                border: Border(left: BorderSide(color: Color(0xFF25252D), width: 1)),
+              decoration: BoxDecoration(
+                color: panelBg,
+                border: Border(left: BorderSide(color: borderCol, width: 1)),
               ),
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -292,10 +307,10 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                     children: [
                       const Icon(Icons.crop, color: Color(0xFF7C4DFF), size: 20),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'REESCALADOR MÓVIL',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: textColor,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -303,31 +318,31 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.grey, size: 18),
+                        icon: Icon(Icons.close, color: subTextColor, size: 18),
                         onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
-                  const Divider(color: Color(0xFF25252D), height: 24),
+                  Divider(color: borderCol, height: 24),
                   
                   // Preset Dropdown
-                  const Text(
+                  Text(
                     'DISPOSITIVO / PRESET:',
-                    style: TextStyle(color: Color(0xFFAAAAAA), fontSize: 10, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF202026),
+                      color: inputBg,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF2D2D37)),
+                      border: Border.all(color: borderCol),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<PhonePreset>(
                         value: _selectedPreset,
-                        dropdownColor: const Color(0xFF15151A),
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                        dropdownColor: dropdownMenuBg,
+                        style: TextStyle(color: textColor, fontSize: 12),
                         isExpanded: true,
                         items: phonePresets.map((p) {
                           return DropdownMenuItem<PhonePreset>(
@@ -352,9 +367,9 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
 
                   // Custom Dimensions
                   if (_selectedPreset.name == 'Personalizado') ...[
-                    const Text(
+                    Text(
                       'MEDIDAS PERSONALIZADAS (px):',
-                      style: TextStyle(color: Color(0xFFAAAAAA), fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -363,12 +378,12 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                           child: TextField(
                             controller: _widthController,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            style: TextStyle(color: textColor, fontSize: 13),
                             onChanged: (_) => setState(_updateActiveDimensions),
                             decoration: InputDecoration(
                               labelText: 'Ancho',
-                              labelStyle: const TextStyle(color: Colors.grey, fontSize: 11),
-                              fillColor: const Color(0xFF202026),
+                              labelStyle: TextStyle(color: subTextColor, fontSize: 11),
+                              fillColor: inputBg,
                               filled: true,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
@@ -380,12 +395,12 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                           child: TextField(
                             controller: _heightController,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            style: TextStyle(color: textColor, fontSize: 13),
                             onChanged: (_) => setState(_updateActiveDimensions),
                             decoration: InputDecoration(
                               labelText: 'Alto',
-                              labelStyle: const TextStyle(color: Colors.grey, fontSize: 11),
-                              fillColor: const Color(0xFF202026),
+                              labelStyle: TextStyle(color: subTextColor, fontSize: 11),
+                              fillColor: inputBg,
                               filled: true,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
@@ -401,20 +416,20 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F0F12),
+                      color: cardBg,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF25252D)),
+                      border: Border.all(color: borderCol),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text('INFO DE RESOLUCIÓN', style: TextStyle(color: Color(0xFF7C4DFF), fontSize: 9, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        Text('Original: ${widget.wallpaper.resolution}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                        Text('Original: ${widget.wallpaper.resolution}', style: TextStyle(color: subTextColor, fontSize: 11)),
                         const SizedBox(height: 4),
-                        Text('Destino: ${_activeWidth}x$_activeHeight px', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text('Destino: ${_activeWidth}x$_activeHeight px', style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text('Ratio: ${targetRatio.toStringAsFixed(3)} (Vertical)', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                        Text('Ratio: ${targetRatio.toStringAsFixed(3)} (Vertical)', style: TextStyle(color: subTextColor, fontSize: 11)),
                       ],
                     ),
                   ),
@@ -424,15 +439,15 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                   // Botones de acción
                   ElevatedButton.icon(
                     onPressed: _isSaving ? null : _saveResizedImage,
-                    icon: const Icon(Icons.check, color: Colors.white, size: 16),
-                    label: const Text(
+                    icon: Icon(Icons.check, color: isLight ? Colors.black87 : Colors.white, size: 16),
+                    label: Text(
                       'Aplicar Ajuste y Guardar',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(color: isLight ? Colors.black87 : Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3A3F47),
+                      backgroundColor: buttonSaveBg,
                       minimumSize: const Size(double.infinity, 42),
-                      side: const BorderSide(color: Color(0xFF505662), width: 1),
+                      side: BorderSide(color: buttonSaveBorder, width: 1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       elevation: 0,
                     ),
@@ -441,12 +456,13 @@ class _MobileResizerDialogState extends ConsumerState<MobileResizerDialog> {
                   OutlinedButton(
                     onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
+                      foregroundColor: textColor,
                       minimumSize: const Size(double.infinity, 40),
-                      side: const BorderSide(color: Color(0xFF2D2D37), width: 1),
+                      side: BorderSide(color: btnCancelBorder, width: 1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      backgroundColor: btnCancelBg,
                     ),
-                    child: const Text('Cancelar', style: TextStyle(color: Color(0xFFAAAAAA), fontSize: 12)),
+                    child: Text('Cancelar', style: TextStyle(color: subTextColor, fontSize: 12)),
                   ),
                 ],
               ),
