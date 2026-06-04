@@ -55,9 +55,13 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
   - Agregar dependencia `file_picker` en `pubspec.yaml`.
   - Rediseñar campos de texto de rutas en el diálogo de ajustes usando un `Row` con un botón "Examinar".
   - Integrar llamada a `FilePicker.platform.getDirectoryPath()` para abrir el diálogo nativo de selección de directorios y actualizar los controladores.
-- [x] **Tarea 2.10: Rediseño Estético Neutro y Botón "Abrir Carpeta de Destino"** | *AkonDeV 06/2026*
-  - Rediseñar los botones del panel de detalles ("Favoritos", "Descargar Original" y "Crear Versión Móvil") a colores neutros oscuros y profesionales (eliminando amarillos, verdes y celestes chillones).
-  - Añadir un botón completo e independiente de ancho completo ("Abrir Carpeta de Destino") que invoque a `openMobileDirectory` de forma explícita y profesional.
+- [x] **Tarea 2.10: Reescalador Móvil Interactivo Dedicado (Ventana Modal)** | *AkonDeV 06/2026*
+  - Implementar la vista dialog [mobile_resizer_dialog.dart](file:///d:/Proyectos%20Antigravity/WallHeaven/wallhaven_explorer_flutter/lib/views/mobile_resizer_dialog.dart) que actúa como un editor y recortador de fotos modal de pantalla dividida.
+  - Ofrecer presets de resoluciones populares de smartphones (iPhone 15 Pro Max, Google Pixel, Samsung Galaxy, Full HD) y campos para ancho/alto personalizados.
+  - Integrar InteractiveViewer con un marco azul de relación de aspecto dinámica y regla de tercios para encuadrar y ajustar el recorte manualmente.
+  - Rediseñar los botones del panel de detalles ("Favoritos", "Descargar Original" y "Ajustar y Crear Móvil") con una paleta neutra, elegante y profesional.
+  - Añadir un botón completo e independiente de ancho completo ("Abrir Carpeta de Destino") que invoque a `openMobileDirectory` de forma explícita.
+
 
 ### FASE 3: QA Y CIERRE
 - [x] **Tarea 3.1: Pruebas unitarias de integración (TDD/SRP)** | *AkonDeV 06/2026*
