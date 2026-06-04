@@ -1,9 +1,11 @@
 # Project Status: Wallhaven Explorer
 
 ## 📍 PUNTO DE RESTAURACIÓN
-- **Fase**: FASE 3 (QA y Cierre) — ✅ COMPLETADA
-- **Tarea Activa**: NINGUNA — Backlog 100% completado
-- **Estado**: PROYECTO COMPLETO — Pendiente `flutter test` en entorno local con SDK instalado
+- **Fase**: FASE 3 (QA y Cierre) — ✅ COMPLETADA AL 100%
+- **Tarea Activa**: POST-CIERRE — Verificación de compilación Windows
+- **Estado**: ✅ 7/7 tests OK (commit `88c02c0`) | Visual Studio instalado | Reinicio pendiente
+- **Próxima acción**: `flutter run -d windows` desde `d:\Proyectos Antigravity\WallHeaven\wallhaven_explorer_flutter`
+- **Flutter SDK**: `D:\flutter\bin` (ya en PATH de usuario)
 
 ---
 
@@ -47,9 +49,10 @@ El proyecto se ha migrado exitosamente desde WPF (.NET 8) a **Flutter & Dart 3.x
 ### FASE 3: QA Y CIERRE
 - [x] **Tarea 3.1: Pruebas unitarias de integración (TDD/SRP)** | *AkonDeV 06/2026*
   - Suite de pruebas de base de datos sqlite3 en memoria, servicios y estados en `test/wallhaven_explorer_tests.dart`.
-- [/] **Tarea 3.2: Ejecución de Tests y Ajustes de Compilación** | *AkonDeV 06/2026*
-  - Auditoría estática completada. Ejecutar `flutter test` cuando el SDK esté disponible en PATH.
-  - Comando: `flutter test test/wallhaven_explorer_tests.dart`
+- [x] **Tarea 3.2: Ejecución de Tests y Ajustes de Compilación** | *AkonDeV 06/2026*
+  - ✅ `flutter test` ejecutado: **7/7 tests pasan**.
+  - Migrado a Riverpod 3.x (`Notifier` / `NotifierProvider`). Guards `ref.mounted` en todos los métodos async.
+  - `ConfigurationService` soporta modo `:memory:` para tests sin escritura a disco.
 - [x] **Tarea 3.3: Auto-auditoría Final de Calidad, Seguridad y Estética** | *AkonDeV 06/2026*
   - ✅ DRY/KISS/SRP: sin lógica duplicada, servicios con responsabilidad única.
   - ✅ Seguridad: inputs de API Key sanitizados con `.trim()`. API Key nunca expuesta en logs.
